@@ -1,0 +1,29 @@
+{
+  "version": "2.0",
+  "agent": {
+    "mode": "config.json → agent_mode, голос «включи агента», галочка в трее",
+    "tools": "files, browser, memory, pc-commands",
+    "requires": "anthropic_api_key + enable_ai"
+  },
+  "memory": {
+    "file": "data/memory.json",
+    "retention_requests": 100,
+    "local_only": true,
+    "shared_instance": true
+  },
+  "files": {
+    "roots": "папка Капри + agent_roots",
+    "backups": "data/backups",
+    "trash": "data/trash",
+    "undo": true
+  },
+  "browser": {
+    "engine": "Playwright Chromium (setup_agent.bat)",
+    "profile": "data/browser_profile"
+  },
+  "assets": {
+    "icons": "assets/icons/ (+capri.ico)",
+    "poses": "assets/poses/",
+    "animations": "assets/anim/<имя>/anim.json (ленивая загрузка)"
+  }
+}
