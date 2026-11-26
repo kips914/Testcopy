@@ -1,5 +1,8 @@
 name: Build launcher EXE
 
+permissions:
+  contents: write
+
 on:
   workflow_dispatch:
   push:
@@ -73,3 +76,20 @@ jobs:
           path: dist/MaDaDevRTS-Launcher.exe
           if-no-files-found: error
           retention-days: 14
+      # Ручной запуск: кладём exe в ветку, чтобы его можно было забрать
+      # обычным git pull (artifact-хост GitHub недоступен из песочницы).
+      - name: Attach exe to branch
+        if: github.event_name == 'workflow_dispatch'
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          mkdir -p release
+          cp dist/MaDaDevRTS-Launcher.exe release/MaDaDevRTS-Launcher.exe
+          git add release/MaDaDevRTS-Launcher.exe
+          if git diff --cached --quiet; then
+            echo "exe уже в ветке, изменений нет"
+          else
+            git commit -m "ci: MaDaDevRTS-Launcher.exe [skip ci]"
+            git push origin "HEAD:refs/heads/${GITHUB_REF_NAME}"
+          fi
