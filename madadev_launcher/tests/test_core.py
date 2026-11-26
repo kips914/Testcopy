@@ -1,0 +1,243 @@
+# -*- coding: utf-8 -*-
+"""Функциональное тестирование ядра лаунчера (без GUI)."""
+import os
+import sys
+import tempfile
+import zipfile
+
+BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, BASE)
+
+from core.config import Config
+from core.demo import ensure_demo_repo, build_demo_repo
+from core.install import Installer, fmt_size, version_cmp
+from core.manifest import load_manifest, resolve, ManifestError
+from core.net import RepoClient, RepoError, sha256_file
+
+fails = []
+
+
+def check(name, cond, extra=""):
+    if cond:
+        print(f"  ok  {name}")
+    else:
+        fails.append(name)
+        print(f"FAIL  {name} {extra}")
+
+
+# 1. Демо-репозиторий
+with tempfile.TemporaryDirectory() as tmp:
+    repo = os.path.join(tmp, "repo")
+    build_demo_repo(repo)
+    check("demo manifest exists", os.path.isfile(os.path.join(repo, "manifest.json")))
+
+    client = RepoClient([repo])
+    manifest = load_manifest(client)
+    check("manifest packages == 7", len(manifest.packages) == 7,
+          f"got {len(manifest.packages)}")
+    check("manifest name", "Демо" in manifest.name)
+
+    # 2. Зеркала: локальный путь и file:// URL
+    client2 = RepoClient([f"file://{repo}"])
+    m2 = load_manifest(client2)
+    check("file:// mirror works", len(m2.packages) == 7)
+
+    # фейловер: битое зеркало первым, рабочее вторым
+    client3 = RepoClient([os.path.join(tmp, "nope"), repo])
+    m3 = load_manifest(client3)
+    check("mirror failover", len(m3.packages) == 7)
+
+    # 3. Резолв зависимостей и дополнений
+    packages, pulled, missing = resolve(manifest, ["route-red-square"],
+                                        auto_addons=True)
+    ids = [p.id for p in packages]
+    check("route pulls base", "base-assets" in ids, str(ids))
+    check("route pulls scenario addon", "scenario-red-square-1" in pulled, str(pulled))
+    check("route pulls sound addon", "addon-sound-demo" in pulled, str(pulled))
+    check("no missing", missing == [], str(missing))
+    check("deps before dependents",
+          ids.index("base-assets") < ids.index("route-red-square"), str(ids))
+    check("route before scenario",
+          ids.index("route-red-square") < ids.index("scenario-red-square-1"), str(ids))
+
+    # без авто-дополнений: только зависимости
+    packages2, pulled2, _ = resolve(manifest, ["route-red-square"],
+                                    auto_addons=False)
+    ids2 = [p.id for p in packages2]
+    check("no auto addons -> only depends",
+          ids2 == ["base-assets", "route-red-square"], str(ids2))
+
+    # полная сборка: подтягиваются ВСЕ пакеты
+    packages3, pulled3, _ = resolve(manifest, ["bundle-full"], auto_addons=True)
+    ids3 = [p.id for p in packages3]
+    check("bundle covers all 7", len(ids3) == 7, str(ids3))
+    check("bundle order: deps first",
+          ids3.index("route-red-square") < ids3.index("bundle-full"), str(ids3))
+
+    # отсутствующий id
+    _, _, missing4 = resolve(manifest, ["no-such-pkg"])
+    check("missing id reported", missing4 == ["no-such-pkg"], str(missing4))
+
+    # 4. Скачивание с проверкой sha256
+    with tempfile.TemporaryDirectory() as tmp2:
+        dest = os.path.join(tmp2, "file.zip")
+        pkg = manifest.get("route-red-square")
+        client.download(pkg.file, dest, sha256=pkg.sha256)
+        check("download + sha256", os.path.isfile(dest)
+              and sha256_file(dest) == pkg.sha256)
+
+        # битая контрольная сумма -> ошибка
+        try:
+            client.download(pkg.file, dest + ".bad", sha256="0" * 64, max_tries=1)
+            check("bad sha raises", False)
+        except RepoError:
+            check("bad sha raises", True)
+
+        # прогресс и отмена
+        seen = []
+        client.download(pkg.file, dest + ".p", sha256=pkg.sha256,
+                        progress=lambda d, t: seen.append((d, t)))
+        check("progress callbacks", len(seen) > 0 and seen[-1][0] >= seen[0][0])
+
+        from core.net import Cancelled
+        try:
+            client.download(pkg.file, dest + ".c", sha256=pkg.sha256,
+                            cancel=lambda: True)
+            check("cancel raises", False)
+        except Cancelled:
+            check("cancel raises", True)
+
+        # 5. Установка в папку игры
+        game = os.path.join(tmp2, "game")
+        os.makedirs(game)
+        inst = Installer(game)
+        check("installer ready", inst.ready)
+
+        # ставим всё (как «Установить всё»)
+        order, pulled_all, _ = resolve(manifest, [p.id for p in manifest.packages],
+                                       auto_addons=True)
+        for p in order:
+            zpath = inst.cache_path(p)
+            os.makedirs(os.path.dirname(zpath), exist_ok=True)
+            client.download(p.file, zpath, sha256=p.sha256)
+            inst.install_package(p, zpath)
+
+        expect_files = [
+            "ROUTES/RedSquare/routes.txt",
+            "ROUTES/RedSquare/ACTIVITIES/morning_run.txt",
+            "TRAINS/TRAINSET/EP20/ep20_demo.txt",
+            "TRAINS/TRAINSET/EP20/cabine_demo.txt",
+            "GLOBAL/SOUNDS/madadev_demo.txt",
+            "GLOBAL/madadev_demo/README.txt",
+            ".mddl/bundle_info.txt",
+        ]
+        for rel in expect_files:
+            check(f"file installed: {rel}", os.path.isfile(os.path.join(game, *rel.split("/"))))
+
+        installed = inst.installed()
+        check("registry has 7", len(installed) == 7, str(len(installed)))
+        check("registry version", installed["route-red-square"]["version"] == "1.2.0")
+
+        # статусы
+        check("status installed", inst.status_label(manifest.get("route-red-square")) == "Установлено")
+
+        # повторная установка — no-op по версии (пропускается в UI по status)
+        check("status same version",
+              inst.status(manifest.get("route-red-square")) == "installed")
+
+        # обновление: подменяем версию в реестре на старую -> update
+        state = inst._load_state()
+        state["packages"]["route-red-square"]["version"] = "1.0.0"
+        inst._save_state(state)
+        check("status update",
+              inst.status(manifest.get("route-red-square")) == "update")
+        check("status label update",
+              inst.status_label(manifest.get("route-red-square")) == "Есть обновление")
+
+        # переустановка новой версии убирает старые файлы-призраки:
+        # добавим файл, которого нет в новой версии
+        ghost = os.path.join(game, "ROUTES", "RedSquare", "old_file.txt")
+        with open(ghost, "w") as f:
+            f.write("x")
+        st = inst._load_state()
+        st["packages"]["route-red-square"]["files"].append("ROUTES/RedSquare/old_file.txt")
+        inst._save_state(st)
+        inst.install_package(manifest.get("route-red-square"),
+                             inst.cache_path(manifest.get("route-red-square")))
+        check("old version ghost file removed", not os.path.exists(ghost))
+        check("new version files present",
+              os.path.isfile(os.path.join(game, "ROUTES", "RedSquare", "routes.txt")))
+        check("status back to installed",
+              inst.status(manifest.get("route-red-square")) == "installed")
+
+        # удаление сценария
+        check("uninstall scenario", inst.uninstall("scenario-red-square-1"))
+        check("scenario file gone",
+              not os.path.isfile(os.path.join(game, "ROUTES", "RedSquare",
+                                               "ACTIVITIES", "morning_run.txt")))
+        check("route file kept",
+              os.path.isfile(os.path.join(game, "ROUTES", "RedSquare", "routes.txt")))
+        check("uninstall unknown -> False", not inst.uninstall("nope"))
+
+        # кеш
+        check("cache detected", inst.is_cached(manifest.get("mod-train-ep20")))
+        freed = inst.clear_cache()
+        cache_left = (sum(os.path.getsize(os.path.join(inst.cache_dir, n))
+                          for n in os.listdir(inst.cache_dir))
+                      if os.path.isdir(inst.cache_dir) else 0)
+        check("cache cleared", freed > 0 and cache_left == 0,
+              f"freed={freed} left={cache_left}")
+
+        # защита от zip-slip
+        evil = os.path.join(tmp2, "evil.zip")
+        with zipfile.ZipFile(evil, "w") as zf:
+            zf.writestr("../hacked.txt", "boom")
+        try:
+            inst.install_package(manifest.get("base-assets"), evil)
+            check("zip-slip blocked", False)
+        except RuntimeError:
+            check("zip-slip blocked", True)
+        check("no file outside game dir",
+              not os.path.isfile(os.path.join(tmp2, "hacked.txt")))
+
+# 6. Версии и размеры
+check("version cmp", version_cmp("1.2.0", "1.10.0") < 0)
+check("version cmp equal", version_cmp("1.2", "1.2.0") == 0)
+check("fmt_size", fmt_size(2048) == "2.0 КБ", fmt_size(2048))
+
+# 7. Конфиг
+with tempfile.TemporaryDirectory() as tmp3:
+    cfg_path = os.path.join(tmp3, "config.json")
+    cfg = Config(cfg_path)
+    cfg.set("game_dir", "D:/game")
+    cfg.save()
+    cfg2 = Config(cfg_path)
+    check("config roundtrip", cfg2.get("game_dir") == "D:/game")
+    # битый файл настроек
+    with open(cfg_path, "w") as f:
+        f.write("{broken")
+    cfg3 = Config(cfg_path)
+    check("broken config -> defaults", cfg3.get("game_dir") == "")
+
+# 8. Битый манифест
+with tempfile.TemporaryDirectory() as tmp4:
+    with open(os.path.join(tmp4, "manifest.json"), "w") as f:
+        f.write("{not json")
+    try:
+        load_manifest(RepoClient([tmp4]))
+        check("broken manifest raises", False)
+    except ManifestError:
+        check("broken manifest raises", True)
+    with open(os.path.join(tmp4, "manifest.json"), "w") as f:
+        f.write('{"packages": []}')
+    try:
+        load_manifest(RepoClient([tmp4]))
+        check("empty packages raises", False)
+    except ManifestError:
+        check("empty packages raises", True)
+
+print()
+if fails:
+    print(f"FAILED: {len(fails)} -> {fails}")
+    sys.exit(1)
+print("ALL TESTS PASSED")
