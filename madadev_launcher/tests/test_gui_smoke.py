@@ -23,6 +23,7 @@ import fake_tkinter as ftk  # noqa: E402
 tk = ftk.install()
 
 import main as launcher  # noqa: E402  (импортирует tkinter — уже заглушка)
+from core.manifest import resolve  # noqa: E402
 
 FAILS = []
 
@@ -58,8 +59,10 @@ def main_test():
     # 1. Каталог загрузился из демо-репозитория
     check("каталог загружен",
           pump(app, lambda: app.manifest is not None))
-    check("7 пакетов в дереве", len(app.cat_tree._rows) == 7,
-          str(list(app.cat_tree._rows)))
+    n_pkgs = len(app.manifest.packages)
+    check("большой каталог (150+ пакетов)", n_pkgs >= 150, str(n_pkgs))
+    check("дерево = манифест", len(app.cat_tree._rows) == n_pkgs,
+          str(len(app.cat_tree._rows)))
     check("журнал без ошибок (старт)", log_errors(app) == [],
           str(log_errors(app)))
 
@@ -71,11 +74,14 @@ def main_test():
     app.search_var.set("")
     app.type_var.set("Карты")
     app._render_catalog()
-    check("фильтр 'Карты' -> 1 пакет", len(app.cat_tree._rows) == 1,
-          str(list(app.cat_tree._rows)))
+    n_maps = sum(1 for p in app.manifest.packages if p.type == "map")
+    check("фильтр 'Карты' -> все карты",
+          len(app.cat_tree._rows) == n_maps and n_maps >= 25,
+          f"{len(app.cat_tree._rows)}/{n_maps}")
     app.type_var.set("Все типы")
     app._render_catalog()
-    check("фильтр сброшен -> 7", len(app.cat_tree._rows) == 7)
+    check("фильтр сброшен -> весь каталог",
+          len(app.cat_tree._rows) == n_pkgs)
 
     # 3. Папка игры
     game = tempfile.mkdtemp(prefix="rts_game_")
@@ -97,9 +103,11 @@ def main_test():
                 "GLOBAL/madadev_demo/README.txt"):
         check(f"файл есть: {rel}",
               os.path.isfile(os.path.join(game, *rel.split("/"))))
-    check("репозиторий: 4 пакета",
-          len(app.installer.installed()) == 4,
-          str(list(app.installer.installed())))
+    exp_pkgs, exp_pulled, _ = resolve(app.manifest, ["route-red-square"],
+                                      auto_addons=True)
+    check("репозиторий: все пакеты карты (с дополнениями)",
+          len(app.installer.installed()) == len(exp_pkgs),
+          f"{len(app.installer.installed())}/{len(exp_pkgs)}")
     check("статус в каталоге обновлён",
           "Установлено" in str(app.cat_tree._rows.get(
               "route-red-square", {}).get("values", "")))
@@ -108,8 +116,9 @@ def main_test():
 
     # 5. Удаление пакетов, связанных с картой
     app._refresh_installed()
-    check("дерево установленных заполнено", len(app.inst_tree._rows) == 4,
-          str(list(app.inst_tree._rows)))
+    check("дерево установленных заполнено",
+          len(app.inst_tree._rows) == len(exp_pkgs),
+          f"{len(app.inst_tree._rows)}/{len(exp_pkgs)}")
     app.inst_tree._selection = ["route-red-square",
                                 "scenario-red-square-1",
                                 "addon-sound-demo"]
@@ -145,9 +154,9 @@ def main_test():
     check("установка всех пакетов",
           pump(app, lambda: not app.job_running and
                app.status_var.get().startswith("Готово")))
-    check("все 7 пакетов установлены",
-          len(app.installer.installed()) == 7,
-          str(list(app.installer.installed())))
+    check("весь каталог установлен",
+          len(app.installer.installed()) == n_pkgs,
+          f"{len(app.installer.installed())}/{n_pkgs}")
     check("сценарий подтянут", os.path.isfile(
         os.path.join(game, "ROUTES", "RedSquare", "ACTIVITIES",
                      "morning_run.txt")))

@@ -33,19 +33,19 @@ with tempfile.TemporaryDirectory() as tmp:
 
     client = RepoClient([repo])
     manifest = load_manifest(client)
-    check("manifest packages == 7", len(manifest.packages) == 7,
-          f"got {len(manifest.packages)}")
+    n_pkgs = len(manifest.packages)
+    check("большой каталог (150+ пакетов)", n_pkgs >= 150, f"got {n_pkgs}")
     check("manifest name", "Демо" in manifest.name)
 
     # 2. Зеркала: локальный путь и file:// URL
     client2 = RepoClient([f"file://{repo}"])
     m2 = load_manifest(client2)
-    check("file:// mirror works", len(m2.packages) == 7)
+    check("file:// mirror works", len(m2.packages) == n_pkgs)
 
     # фейловер: битое зеркало первым, рабочее вторым
     client3 = RepoClient([os.path.join(tmp, "nope"), repo])
     m3 = load_manifest(client3)
-    check("mirror failover", len(m3.packages) == 7)
+    check("mirror failover", len(m3.packages) == n_pkgs)
 
     # 3. Резолв зависимостей и дополнений
     packages, pulled, missing = resolve(manifest, ["route-red-square"],
@@ -70,7 +70,10 @@ with tempfile.TemporaryDirectory() as tmp:
     # полная сборка: подтягиваются ВСЕ пакеты
     packages3, pulled3, _ = resolve(manifest, ["bundle-full"], auto_addons=True)
     ids3 = [p.id for p in packages3]
-    check("bundle covers all 7", len(ids3) == 7, str(ids3))
+    all_ids = {p.id for p in manifest.packages}
+    check("bundle-full покрывает весь каталог",
+          set(ids3) == all_ids,
+          f"{len(ids3)}/{len(all_ids)}")
     check("bundle order: deps first",
           ids3.index("route-red-square") < ids3.index("bundle-full"), str(ids3))
 
@@ -135,7 +138,8 @@ with tempfile.TemporaryDirectory() as tmp:
             check(f"file installed: {rel}", os.path.isfile(os.path.join(game, *rel.split("/"))))
 
         installed = inst.installed()
-        check("registry has 7", len(installed) == 7, str(len(installed)))
+        check("registry == весь каталог", len(installed) == n_pkgs,
+              f"{len(installed)}/{n_pkgs}")
         check("registry version", installed["route-red-square"]["version"] == "1.2.0")
 
         # статусы
