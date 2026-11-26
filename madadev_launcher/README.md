@@ -35,6 +35,11 @@
 
 ## Сборка .exe (standalone)
 
+**Готовый exe уже собран и лежит в репозитории:**
+[`release/MaDaDevRTS-Launcher.exe`](../release/MaDaDevRTS-Launcher.exe)
+(≈13 МБ, x86-64) — скачай его прямо с страницы ветки или забериз раздела **Actions → Artifacts**. Переупаковка не нужна: файл
+самодостаточный, Python не требуется.
+
 **Вариант 1 — на своём ПК (Windows):** запусти **`build_exe.bat`**.
 Он поставит PyInstaller и создаст один самодостаточный файл
 `dist\MaDaDevRTS-Launcher.exe` (без консоли, с иконкой и версией в
