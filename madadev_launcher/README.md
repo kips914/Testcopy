@@ -224,6 +224,45 @@ python3 tests/test_core.py       # ядро: зеркала, SHA-256, устан
 python3 tests/test_gui_smoke.py  # логика окна без дисплея
 ```
 
+## Каталог реального контента (по умолчанию)
+
+Лаунчер сразу подключает **публичное зеркало реального контента** —
+ветку [`content`](https://github.com/kips914/Testcopy/tree/content)
+этого репозитория:
+
+```
+https://raw.githubusercontent.com/kips914/Testcopy/content
+```
+
+Это не демо-заглушка: внутри настоящие файлы игр, собранные из открытых
+источников и разбитые на пакеты `tools/make_repo.py` (SHA-256,
+`mddl.json`, зависимости):
+
+| Пакетов | Тип | Что внутри |
+|---|---|---|
+| 2 | карты | **Каскайс** (Cascais, Португалия) и **Реда — Хель** (Польша) |
+| 22 | моды | составы CP/CP5600/CP4000/SELocomotives… (комплект Каскайс) |
+| 20 | сценарии | 15 активностей Каскайс + 4 Реда—Хель + расписания Alföld |
+| 18 | дополнения | текстуры, террайн, тайлы и звуки маршрутов (части ≤70 МБ) |
+| 3 | база | глобальные ресурсы Каскайс (2 части) + tsection.dat (CC0) |
+| 3 | наборы | «Каскайс полностью», «Реда—Хель полностью», «Весь контент» |
+
+**Источники и лицензии:**
+
+* [cpvirtual/OR_CPV_Cascais](https://github.com/cpvirtual/OR_CPV_Cascais) —
+  GPL-3.0 (маршрут, составы, GLOBAL, звуки, активности);
+* [MarekNowosad/Open-Rails-Reda-Hel_ver1](https://github.com/MarekNowosad/Open-Rails-Reda-Hel_ver1) —
+  маршрут Реда—Хель (маршрут без состава — состав бери из Каскайса);
+* [disconnect5852/Alfold_openrails_timetable](https://github.com/disconnect5852/Alfold_openrails_timetable) —
+  расписания для маршрута Alföld;
+* [perpetualKid/tsection.dat](https://github.com/perpetualKid/tsection.dat) —
+  CC0.
+
+Зеркало можно заменить своим в **Настройки → Зеркала** (демо-заглушка
+по-прежнему отключена по умолчанию и включается только галочкой).
+Чтобы пересобрать зеркало: скачай zip исходников, разложи по папкам
+с `mddl.json` и прогони `python tools/make_repo.py <папка> <выход>`.
+
 ## База: RTrainSim (RTS)
 
 MaDaDev RTS — это **RTrainSim** (наследник Microsoft Train Simulator).

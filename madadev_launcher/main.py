@@ -36,7 +36,7 @@ except ImportError:  # pragma: no cover
     sys.exit(1)
 
 from core import paths as app_paths
-from core.config import Config
+from core.config import CONTENT_MIRROR, Config
 from core.demo import ensure_demo_repo
 from core.install import (Installer, fmt_size, looks_like_game_tree,
                           read_package_meta)
@@ -407,7 +407,12 @@ class LauncherApp:
                 mirrors.append(ensure_demo_repo(os.path.join(BASE_DIR, "demo_repo")))
             except Exception as exc:  # noqa: BLE001
                 self.log(f"Не удалось создать демо-репозиторий: {exc}", "warn")
-        mirrors.extend([m for m in (self.cfg.get("mirrors") or []) if m])
+        user = [m for m in (self.cfg.get("mirrors") or []) if m]
+        # Публичное зеркало реального контента — всегда после демо и перед
+        # пользовательскими зеркалами (каталог непустой с первого запуска).
+        if CONTENT_MIRROR not in user:
+            mirrors.append(CONTENT_MIRROR)
+        mirrors.extend(user)
         return mirrors
 
     def rebuild_client(self) -> None:
@@ -424,7 +429,12 @@ class LauncherApp:
         self.mirror_list.delete(0, "end")
         active = int(self.cfg.get("active_mirror") or 0)
         for idx, mirror in enumerate(self.effective_mirrors()):
-            label = "🧪 демо (офлайн)" if idx == 0 and self.cfg.get("use_demo_repo") else mirror
+            if mirror == CONTENT_MIRROR:
+                label = "🌍 контент (GitHub)"
+            elif idx == 0 and self.cfg.get("use_demo_repo"):
+                label = "🧪 демо (офлайн)"
+            else:
+                label = mirror
             if idx == active:
                 label = "● " + label
             self.mirror_list.insert("end", label)
@@ -464,12 +474,21 @@ class LauncherApp:
             messagebox.showinfo(APP_TITLE, "Демо-зеркало убирается галочкой "
                                "«Встроенный демо-каталог».", parent=self.root)
             return
-        offset = 1 if self.cfg.get("use_demo_repo") else 0
-        mirrors = list(self.cfg.get("mirrors") or [])
+        user = list(self.cfg.get("mirrors") or [])
+        offset = (1 if self.cfg.get("use_demo_repo") else 0) \
+            + (0 if CONTENT_MIRROR in user else 1)
+        if idx == offset - 1 and CONTENT_MIRROR not in user:
+            messagebox.showinfo(
+                APP_TITLE,
+                "Встроенное зеркало контента убрать нельзя — но можно "
+                "сделать активным другое зеркало из списка.",
+                parent=self.root,
+            )
+            return
         pos = idx - offset
-        if 0 <= pos < len(mirrors):
-            removed = mirrors.pop(pos)
-            self.cfg.set("mirrors", mirrors)
+        if 0 <= pos < len(user):
+            removed = user.pop(pos)
+            self.cfg.set("mirrors", user)
             if int(self.cfg.get("active_mirror") or 0) >= len(self.effective_mirrors()):
                 self.cfg.set("active_mirror", 0)
             self.rebuild_client()

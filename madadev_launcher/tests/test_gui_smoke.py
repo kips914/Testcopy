@@ -212,10 +212,19 @@ def main_test():
     app._remove_mirror()     # без выделения — no-op
     app._add_mirror()        # диалог отменён (None) — no-op
     check("зеркала не сломаны", len(app.effective_mirrors()) >= 1)
+    check("зеркало реального контента по умолчанию",
+          launcher.CONTENT_MIRROR in app.effective_mirrors())
+    check("контент-зеркало идёт после демо",
+          app.effective_mirrors().index(launcher.CONTENT_MIRROR) >=
+          (1 if app.cfg.get("use_demo_repo") else 0))
     app._clear_cache()
     check("кеш очищен", log_errors(app) == [], str(log_errors(app)))
 
-    # 10. Ошибочное зеркало: каталог недоступен, но всё не падает
+    # 10. Ошибочное зеркало: каталог недоступен, но всё не падает.
+    # Контент-зеркало подменяем на заведомо битый ЛОКАЛЬНЫЙ путь —
+    # проверка одинакова и офлайн, и в CI с доступной сетью.
+    real_mirror = launcher.CONTENT_MIRROR
+    launcher.CONTENT_MIRROR = os.path.join(game, "no_such_mirror")
     app.demo_var.set(False)
     app._toggle_demo()
     check("ошибка каталога обработана",
@@ -223,7 +232,8 @@ def main_test():
     check("сообщение показано",
           any(c[0] == "showwarning" for c in ftk.messagebox_calls),
           str(ftk.messagebox_calls[-3:]))
-    # обратно включаем демо
+    # обратно включаем демо и возвращаем зеркало
+    launcher.CONTENT_MIRROR = real_mirror
     app.demo_var.set(True)
     app._toggle_demo()
     check("каталог снова загружен",
