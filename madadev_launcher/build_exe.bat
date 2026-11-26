@@ -10,8 +10,8 @@ if errorlevel 1 (
     exit /b 1
 )
 
-echo [1/2] Устанавливаю PyInstaller...
-python -m pip install --upgrade pyinstaller
+echo [1/2] Устанавливаю PyInstaller и Pillow...
+python -m pip install --upgrade pyinstaller pillow
 if errorlevel 1 goto :err
 
 echo [2/2] Собираю standalone exe (это занимает 1-3 минуты)...
