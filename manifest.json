@@ -1,0 +1,1310 @@
+{
+  "schema": 1,
+  "name": "Репозиторий content_repo",
+  "updated": "2026-11-26T19:35:19Z",
+  "packages": [
+    {
+      "id": "alfold-timetable",
+      "name": "Alföld: расписания",
+      "type": "scenario",
+      "version": "1.0.0",
+      "description": "Активности/расписания для маршрута Alföld (Open Rails). Источник: github.com/disconnect5852/Alfold_openrails_timetable. Сам маршрут не входит.",
+      "depends": [],
+      "addons": [],
+      "file": "packages/alfold-timetable-1.0.0.zip",
+      "size": 241634,
+      "sha256": "7ac5078a3b97f8e003fb2d1dbfeb22a4d4422ba02bd8d0c8dd71bf8d6b2cd98f"
+    },
+    {
+      "id": "bundle-all",
+      "name": "Весь реальный контент",
+      "type": "bundle",
+      "version": "1.0.0",
+      "description": "Все маршруты, составы, сценарии и базовые файлы.",
+      "depends": [],
+      "addons": [
+        "alfold-timetable",
+        "base-tsection",
+        "bundle-cascais",
+        "bundle-redahel",
+        "cascais-global-1",
+        "cascais-global-2",
+        "cascais-route",
+        "cascais-sound",
+        "cascais-terrtex-1",
+        "cascais-terrtex-2",
+        "cascais-terrtex-3",
+        "cascais-terrtex-4",
+        "cascais-terrtex-5",
+        "cascais-textures-1",
+        "cascais-textures-2",
+        "cascais-textures-3",
+        "cascais-tiles",
+        "redahel-route",
+        "redahel-sound",
+        "redahel-terrtex",
+        "redahel-textures-1",
+        "redahel-textures-2",
+        "redahel-textures-3",
+        "redahel-tiles-1",
+        "redahel-tiles-2",
+        "redahel-tiles-3",
+        "scenario-cascais-01sub19103fds_pt",
+        "scenario-cascais-02sub19510_pt",
+        "scenario-cascais-03sub19147_pt",
+        "scenario-cascais-04sub19768_pt",
+        "scenario-cascais-05esp13810-1_pt",
+        "scenario-cascais-06sub19400_pt",
+        "scenario-cascais-07ir807-6_pt",
+        "scenario-cascais-08subesp39905_pt",
+        "scenario-cascais-09sub19531_pt",
+        "scenario-cascais-10sub19287_pt",
+        "scenario-cascais-11sub19659_pt",
+        "scenario-cascais-12tornodefosso_pt",
+        "scenario-cascais-13obstrucao_pt",
+        "scenario-cascais-14servico19281_pt",
+        "scenario-cascais-15servico19095_pt",
+        "scenario-redahel-m61_r-93526-hel-gdynia-2011",
+        "scenario-redahel-m61_skm59750-s1-wejcherowo-gdansk",
+        "scenario-redahel-m61_skm95667-s1_gdansk-wejcherowo",
+        "scenario-redahel-tlk-hel--katowice-2011",
+        "train-cp0450",
+        "train-cp1150",
+        "train-cp1200",
+        "train-cp1400",
+        "train-cp1900",
+        "train-cp3250",
+        "train-cp3500",
+        "train-cp4000",
+        "train-cp5600",
+        "train-cpcarelfouche",
+        "train-cpciwl",
+        "train-cpdf730",
+        "train-cpdietrich",
+        "train-cpgkks",
+        "train-cpgruas",
+        "train-cpplataformas",
+        "train-cpsggmrss",
+        "train-cpsorefame",
+        "train-cpv.containerdata",
+        "train-cpvblind",
+        "train-sebaumemarpent",
+        "train-selocomotives"
+      ],
+      "file": "packages/bundle-all-1.0.0.zip",
+      "size": 792,
+      "sha256": "d0789d789e1ae5eec742758b94328f82e8f15eea86b5f4ee81ea36c81bdbfbed"
+    },
+    {
+      "id": "bundle-cascais",
+      "name": "Набор: Каскайс полностью",
+      "type": "bundle",
+      "version": "1.0.0",
+      "description": "Маршрут, ресурсы, все составы и сценарии Каскайс.",
+      "depends": [],
+      "addons": [
+        "cascais-global-1",
+        "cascais-global-2",
+        "cascais-route",
+        "cascais-sound",
+        "cascais-terrtex-1",
+        "cascais-terrtex-2",
+        "cascais-terrtex-3",
+        "cascais-terrtex-4",
+        "cascais-terrtex-5",
+        "cascais-textures-1",
+        "cascais-textures-2",
+        "cascais-textures-3",
+        "cascais-tiles",
+        "scenario-cascais-01sub19103fds_pt",
+        "scenario-cascais-02sub19510_pt",
+        "scenario-cascais-03sub19147_pt",
+        "scenario-cascais-04sub19768_pt",
+        "scenario-cascais-05esp13810-1_pt",
+        "scenario-cascais-06sub19400_pt",
+        "scenario-cascais-07ir807-6_pt",
+        "scenario-cascais-08subesp39905_pt",
+        "scenario-cascais-09sub19531_pt",
+        "scenario-cascais-10sub19287_pt",
+        "scenario-cascais-11sub19659_pt",
+        "scenario-cascais-12tornodefosso_pt",
+        "scenario-cascais-13obstrucao_pt",
+        "scenario-cascais-14servico19281_pt",
+        "scenario-cascais-15servico19095_pt",
+        "train-cp0450",
+        "train-cp1150",
+        "train-cp1200",
+        "train-cp1400",
+        "train-cp1900",
+        "train-cp3250",
+        "train-cp3500",
+        "train-cp4000",
+        "train-cp5600",
+        "train-cpcarelfouche",
+        "train-cpciwl",
+        "train-cpdf730",
+        "train-cpdietrich",
+        "train-cpgkks",
+        "train-cpgruas",
+        "train-cpplataformas",
+        "train-cpsggmrss",
+        "train-cpsorefame",
+        "train-cpv.containerdata",
+        "train-cpvblind",
+        "train-sebaumemarpent",
+        "train-selocomotives"
+      ],
+      "file": "packages/bundle-cascais-1.0.0.zip",
+      "size": 659,
+      "sha256": "460a13d431b4278a6b6e9c3c7f9076b8d5bcc9e8c7f1dad83a2f9193518ce262"
+    },
+    {
+      "id": "bundle-redahel",
+      "name": "Набор: Реда—Хель полностью",
+      "type": "bundle",
+      "version": "1.0.0",
+      "description": "Маршрут Реда—Хель со всеми ресурсами и сценариями.",
+      "depends": [],
+      "addons": [
+        "redahel-route",
+        "redahel-sound",
+        "redahel-terrtex",
+        "redahel-textures-1",
+        "redahel-textures-2",
+        "redahel-textures-3",
+        "redahel-tiles-1",
+        "redahel-tiles-2",
+        "redahel-tiles-3",
+        "scenario-redahel-m61_r-93526-hel-gdynia-2011",
+        "scenario-redahel-m61_skm59750-s1-wejcherowo-gdansk",
+        "scenario-redahel-m61_skm95667-s1_gdansk-wejcherowo",
+        "scenario-redahel-tlk-hel--katowice-2011"
+      ],
+      "file": "packages/bundle-redahel-1.0.0.zip",
+      "size": 463,
+      "sha256": "2ec5b55c1e2d9c00b434ef754479547e01c80a291cefb2c4e762931d69188a70"
+    },
+    {
+      "id": "cascais-global-1",
+      "name": "Каскайс: глобальные ресурсы (часть 1)",
+      "type": "base",
+      "version": "1.0.0",
+      "description": "GLOBAL-файлы (shapes/textures/tsection) комплекта Каскайс. Источник: cpvirtual/OR_CPV_Cascais, GPL-3.0.",
+      "depends": [],
+      "addons": [],
+      "file": "packages/cascais-global-1-1.0.0.zip",
+      "size": 61943376,
+      "sha256": "5277b6bb9f9bfd01306408af97e4b4e5c41c0082eae9c6acfc03c7e63519a25a"
+    },
+    {
+      "id": "cascais-global-2",
+      "name": "Каскайс: глобальные ресурсы (часть 2)",
+      "type": "base",
+      "version": "1.0.0",
+      "description": "GLOBAL-файлы (shapes/textures/tsection) комплекта Каскайс. Источник: cpvirtual/OR_CPV_Cascais, GPL-3.0.",
+      "depends": [
+        "cascais-global-1"
+      ],
+      "addons": [],
+      "file": "packages/cascais-global-2-1.0.0.zip",
+      "size": 6213529,
+      "sha256": "5ee2f16a8af8252a064c97befafd0e4bee48ac3becc93629f8251fca099757ec"
+    },
+    {
+      "id": "cascais-route",
+      "name": "Каскайс (Cascais)",
+      "type": "map",
+      "version": "1.0.0",
+      "description": "Маршрут Каскайс, Португалия (Open Rails/MSTS). Источник: github.com/cpvirtual/OR_CPV_Cascais, GPL-3.0.",
+      "depends": [],
+      "addons": [],
+      "file": "packages/cascais-route-1.0.0.zip",
+      "size": 14100760,
+      "sha256": "8d4ac661ab2d9ac6d07dc0901584743a22a7387504337f7778486b88d9d8c7a9"
+    },
+    {
+      "id": "cascais-sound",
+      "name": "Каскайс: звуки",
+      "type": "addon",
+      "version": "1.0.0",
+      "description": "Звуковые файлы комплекта Каскайс.",
+      "depends": [
+        "cascais-route"
+      ],
+      "addons": [],
+      "file": "packages/cascais-sound-1.0.0.zip",
+      "size": 68989539,
+      "sha256": "edde0dea7ef32d2395afde401ef96af18bdc5935fee8d283b4b2175ef7e99d09"
+    },
+    {
+      "id": "cascais-terrtex-1",
+      "name": "Каскайс: террайн-текстуры (часть 1)",
+      "type": "addon",
+      "version": "1.0.0",
+      "description": "Файлы маршрута Каскайс: террайн-текстуры.",
+      "depends": [
+        "cascais-route"
+      ],
+      "addons": [],
+      "file": "packages/cascais-terrtex-1-1.0.0.zip",
+      "size": 57566302,
+      "sha256": "8a1cbf06bb346dcc7b22bf1d76dcf43b363ae875a1694f534a9272ffcf13d530"
+    },
+    {
+      "id": "cascais-terrtex-2",
+      "name": "Каскайс: террайн-текстуры (часть 2)",
+      "type": "addon",
+      "version": "1.0.0",
+      "description": "Файлы маршрута Каскайс: террайн-текстуры.",
+      "depends": [
+        "cascais-route"
+      ],
+      "addons": [],
+      "file": "packages/cascais-terrtex-2-1.0.0.zip",
+      "size": 58452156,
+      "sha256": "e2a8f2ff7e14d4776c2ff4b79f02d34a3b29ad3e5b342bd95f228d91bc26ed00"
+    },
+    {
+      "id": "cascais-terrtex-3",
+      "name": "Каскайс: террайн-текстуры (часть 3)",
+      "type": "addon",
+      "version": "1.0.0",
+      "description": "Файлы маршрута Каскайс: террайн-текстуры.",
+      "depends": [
+        "cascais-route"
+      ],
+      "addons": [],
+      "file": "packages/cascais-terrtex-3-1.0.0.zip",
+      "size": 53849677,
+      "sha256": "fd2d48fe81f2bece453a36f7c9255f8ad929e75d45f54966ad05e3643133d7b3"
+    },
+    {
+      "id": "cascais-terrtex-4",
+      "name": "Каскайс: террайн-текстуры (часть 4)",
+      "type": "addon",
+      "version": "1.0.0",
+      "description": "Файлы маршрута Каскайс: террайн-текстуры.",
+      "depends": [
+        "cascais-route"
+      ],
+      "addons": [],
+      "file": "packages/cascais-terrtex-4-1.0.0.zip",
+      "size": 21095651,
+      "sha256": "ddc3497addf030a5206f8642c60ed24241a20e3e3fa30f5afec1ac03c6a5cdc3"
+    },
+    {
+      "id": "cascais-terrtex-5",
+      "name": "Каскайс: террайн-текстуры (часть 5)",
+      "type": "addon",
+      "version": "1.0.0",
+      "description": "Файлы маршрута Каскайс: террайн-текстуры.",
+      "depends": [
+        "cascais-route"
+      ],
+      "addons": [],
+      "file": "packages/cascais-terrtex-5-1.0.0.zip",
+      "size": 33019005,
+      "sha256": "672fcd28a9e4d0d28a26ed36e3ba221b63299479befbd264507abc2e0bb665ae"
+    },
+    {
+      "id": "cascais-textures-1",
+      "name": "Каскайс: текстуры (часть 1)",
+      "type": "addon",
+      "version": "1.0.0",
+      "description": "Файлы маршрута Каскайс: текстуры.",
+      "depends": [
+        "cascais-route"
+      ],
+      "addons": [],
+      "file": "packages/cascais-textures-1-1.0.0.zip",
+      "size": 50613400,
+      "sha256": "63f5373920fda4ad38d94dd3163e7c6e9f81b86140a3309e378e337af2b64265"
+    },
+    {
+      "id": "cascais-textures-2",
+      "name": "Каскайс: текстуры (часть 2)",
+      "type": "addon",
+      "version": "1.0.0",
+      "description": "Файлы маршрута Каскайс: текстуры.",
+      "depends": [
+        "cascais-route"
+      ],
+      "addons": [],
+      "file": "packages/cascais-textures-2-1.0.0.zip",
+      "size": 51345436,
+      "sha256": "cce41a2ec75f2993549bb9b05ddea3a5b2cdf510e310cb015567d06556e9261f"
+    },
+    {
+      "id": "cascais-textures-3",
+      "name": "Каскайс: текстуры (часть 3)",
+      "type": "addon",
+      "version": "1.0.0",
+      "description": "Файлы маршрута Каскайс: текстуры.",
+      "depends": [
+        "cascais-route"
+      ],
+      "addons": [],
+      "file": "packages/cascais-textures-3-1.0.0.zip",
+      "size": 41136732,
+      "sha256": "30ead8d0d373178a494a421753064a511a9ad936d1f35c795e4bcfb0fd62cea2"
+    },
+    {
+      "id": "cascais-tiles",
+      "name": "Каскайс: тайлы",
+      "type": "addon",
+      "version": "1.0.0",
+      "description": "Файлы маршрута Каскайс: тайлы.",
+      "depends": [
+        "cascais-route"
+      ],
+      "addons": [],
+      "file": "packages/cascais-tiles-1.0.0.zip",
+      "size": 3080552,
+      "sha256": "db2d64a37f5b6821981e3083dafea14df7afda98f38c95f340abe635cfe17835"
+    },
+    {
+      "id": "redahel-route",
+      "name": "Реда — Хель (Reda-Hel)",
+      "type": "map",
+      "version": "1.0.0",
+      "description": "Маршрут Реда—Хель, Польша (Open Rails/MSTS). Источник: github.com/MarekNowosad/Open-Rails-Reda-Hel_ver1. Подвижной состав не входит.",
+      "depends": [],
+      "addons": [],
+      "file": "packages/redahel-route-1.0.0.zip",
+      "size": 23288248,
+      "sha256": "01cc1ffd658e1e8c64a8a510ebe20564ad3845e1dc52a73d478e9e9ae6b16813"
+    },
+    {
+      "id": "redahel-sound",
+      "name": "Реда—Хель: звуки",
+      "type": "addon",
+      "version": "1.0.0",
+      "description": "Файлы маршрута Реда—Хель: звуки.",
+      "depends": [
+        "redahel-route"
+      ],
+      "addons": [],
+      "file": "packages/redahel-sound-1.0.0.zip",
+      "size": 543085,
+      "sha256": "b4c80aef7717679f74b99f05a59e7ce02f7b3c920e7f7482cc56cc0fed522f55"
+    },
+    {
+      "id": "redahel-terrtex",
+      "name": "Реда—Хель: террайн-текстуры",
+      "type": "addon",
+      "version": "1.0.0",
+      "description": "Файлы маршрута Реда—Хель: террайн-текстуры.",
+      "depends": [
+        "redahel-route"
+      ],
+      "addons": [],
+      "file": "packages/redahel-terrtex-1.0.0.zip",
+      "size": 50341283,
+      "sha256": "c82ea0484e8503d2a09eb71f846abbfbf62c8a59f1291e03673d1acf806599cb"
+    },
+    {
+      "id": "redahel-textures-1",
+      "name": "Реда—Хель: текстуры (часть 1)",
+      "type": "addon",
+      "version": "1.0.0",
+      "description": "Файлы маршрута Реда—Хель: текстуры.",
+      "depends": [
+        "redahel-route"
+      ],
+      "addons": [],
+      "file": "packages/redahel-textures-1-1.0.0.zip",
+      "size": 66542110,
+      "sha256": "56fdaed52bcd18b3cb52002b41c24b76c177d22d589e248f25050b18aeb58709"
+    },
+    {
+      "id": "redahel-textures-2",
+      "name": "Реда—Хель: текстуры (часть 2)",
+      "type": "addon",
+      "version": "1.0.0",
+      "description": "Файлы маршрута Реда—Хель: текстуры.",
+      "depends": [
+        "redahel-route"
+      ],
+      "addons": [],
+      "file": "packages/redahel-textures-2-1.0.0.zip",
+      "size": 68024440,
+      "sha256": "f943274ad9087afd7c995014bd15f5e1d4ea8d55643021be1c5f74980f9f7420"
+    },
+    {
+      "id": "redahel-textures-3",
+      "name": "Реда—Хель: текстуры (часть 3)",
+      "type": "addon",
+      "version": "1.0.0",
+      "description": "Файлы маршрута Реда—Хель: текстуры.",
+      "depends": [
+        "redahel-route"
+      ],
+      "addons": [],
+      "file": "packages/redahel-textures-3-1.0.0.zip",
+      "size": 59803722,
+      "sha256": "72683626d06d16929cec331a3903ad9028136209d226c6a73d6c95570adfd70a"
+    },
+    {
+      "id": "redahel-tiles-1",
+      "name": "Реда—Хель: тайлы (часть 1)",
+      "type": "addon",
+      "version": "1.0.0",
+      "description": "Файлы маршрута Реда—Хель: тайлы.",
+      "depends": [
+        "redahel-route"
+      ],
+      "addons": [],
+      "file": "packages/redahel-tiles-1-1.0.0.zip",
+      "size": 3253581,
+      "sha256": "50df4f28d04ae8bcbcf9795e32cb35338bc334669e6533f756fa59a302b2759c"
+    },
+    {
+      "id": "redahel-tiles-2",
+      "name": "Реда—Хель: тайлы (часть 2)",
+      "type": "addon",
+      "version": "1.0.0",
+      "description": "Файлы маршрута Реда—Хель: тайлы.",
+      "depends": [
+        "redahel-route"
+      ],
+      "addons": [],
+      "file": "packages/redahel-tiles-2-1.0.0.zip",
+      "size": 1989866,
+      "sha256": "39ced9eb4d12904d86a683504ead9d20a3dd3ee89e036e05f6df956efaf033e4"
+    },
+    {
+      "id": "redahel-tiles-3",
+      "name": "Реда—Хель: тайлы (часть 3)",
+      "type": "addon",
+      "version": "1.0.0",
+      "description": "Файлы маршрута Реда—Хель: тайлы.",
+      "depends": [
+        "redahel-route"
+      ],
+      "addons": [],
+      "file": "packages/redahel-tiles-3-1.0.0.zip",
+      "size": 618446,
+      "sha256": "1347965d2aab2519e8c89ef52e5bc8c9737093b10fb46fdab4d1c680ed98589a"
+    },
+    {
+      "id": "scenario-cascais-01sub19103fds_pt",
+      "name": "Сценарий: 01sub19103fds_pt",
+      "type": "scenario",
+      "version": "1.0.0",
+      "description": "Активность маршрута Каскайс. Требует маршрут и составы (см. bundle-cascais).",
+      "depends": [
+        "cascais-route",
+        "cascais-tiles",
+        "cascais-sound",
+        "cascais-global-1",
+        "cascais-global-2",
+        "cascais-terrtex-1",
+        "cascais-terrtex-2",
+        "cascais-terrtex-3",
+        "cascais-terrtex-4",
+        "cascais-terrtex-5",
+        "cascais-textures-1",
+        "cascais-textures-2",
+        "cascais-textures-3"
+      ],
+      "addons": [],
+      "file": "packages/scenario-cascais-01sub19103fds_pt-1.0.0.zip",
+      "size": 3231,
+      "sha256": "6281b378e79068349a6616ab39e685d0d226b8fcfb538749bd8af33eacef4095"
+    },
+    {
+      "id": "scenario-cascais-02sub19510_pt",
+      "name": "Сценарий: 02sub19510_pt",
+      "type": "scenario",
+      "version": "1.0.0",
+      "description": "Активность маршрута Каскайс. Требует маршрут и составы (см. bundle-cascais).",
+      "depends": [
+        "cascais-route",
+        "cascais-tiles",
+        "cascais-sound",
+        "cascais-global-1",
+        "cascais-global-2",
+        "cascais-terrtex-1",
+        "cascais-terrtex-2",
+        "cascais-terrtex-3",
+        "cascais-terrtex-4",
+        "cascais-terrtex-5",
+        "cascais-textures-1",
+        "cascais-textures-2",
+        "cascais-textures-3"
+      ],
+      "addons": [],
+      "file": "packages/scenario-cascais-02sub19510_pt-1.0.0.zip",
+      "size": 4532,
+      "sha256": "c79c8f4da37315d57a44307d0e507a290ee9299506b404bcb6a4b100a28814d8"
+    },
+    {
+      "id": "scenario-cascais-03sub19147_pt",
+      "name": "Сценарий: 03sub19147_pt",
+      "type": "scenario",
+      "version": "1.0.0",
+      "description": "Активность маршрута Каскайс. Требует маршрут и составы (см. bundle-cascais).",
+      "depends": [
+        "cascais-route",
+        "cascais-tiles",
+        "cascais-sound",
+        "cascais-global-1",
+        "cascais-global-2",
+        "cascais-terrtex-1",
+        "cascais-terrtex-2",
+        "cascais-terrtex-3",
+        "cascais-terrtex-4",
+        "cascais-terrtex-5",
+        "cascais-textures-1",
+        "cascais-textures-2",
+        "cascais-textures-3"
+      ],
+      "addons": [],
+      "file": "packages/scenario-cascais-03sub19147_pt-1.0.0.zip",
+      "size": 4488,
+      "sha256": "df1eec286d3ffe23f6985217a51b14c4b0733ab68fadcb6eb3b62312f0747d29"
+    },
+    {
+      "id": "scenario-cascais-04sub19768_pt",
+      "name": "Сценарий: 04sub19768_pt",
+      "type": "scenario",
+      "version": "1.0.0",
+      "description": "Активность маршрута Каскайс. Требует маршрут и составы (см. bundle-cascais).",
+      "depends": [
+        "cascais-route",
+        "cascais-tiles",
+        "cascais-sound",
+        "cascais-global-1",
+        "cascais-global-2",
+        "cascais-terrtex-1",
+        "cascais-terrtex-2",
+        "cascais-terrtex-3",
+        "cascais-terrtex-4",
+        "cascais-terrtex-5",
+        "cascais-textures-1",
+        "cascais-textures-2",
+        "cascais-textures-3"
+      ],
+      "addons": [],
+      "file": "packages/scenario-cascais-04sub19768_pt-1.0.0.zip",
+      "size": 3952,
+      "sha256": "f9a75b72bb65f2fad625abdc2fd0b13f966eaa5e0b9b7fb5cda3a214485b6f56"
+    },
+    {
+      "id": "scenario-cascais-05esp13810-1_pt",
+      "name": "Сценарий: 05esp13810-1_pt",
+      "type": "scenario",
+      "version": "1.0.0",
+      "description": "Активность маршрута Каскайс. Требует маршрут и составы (см. bundle-cascais).",
+      "depends": [
+        "cascais-route",
+        "cascais-tiles",
+        "cascais-sound",
+        "cascais-global-1",
+        "cascais-global-2",
+        "cascais-terrtex-1",
+        "cascais-terrtex-2",
+        "cascais-terrtex-3",
+        "cascais-terrtex-4",
+        "cascais-terrtex-5",
+        "cascais-textures-1",
+        "cascais-textures-2",
+        "cascais-textures-3"
+      ],
+      "addons": [],
+      "file": "packages/scenario-cascais-05esp13810-1_pt-1.0.0.zip",
+      "size": 3861,
+      "sha256": "94e7a4202fc9199d5e1058c9cf022a7aebbd18a86c0a701862a43949f1ebc1c5"
+    },
+    {
+      "id": "scenario-cascais-06sub19400_pt",
+      "name": "Сценарий: 06sub19400_pt",
+      "type": "scenario",
+      "version": "1.0.0",
+      "description": "Активность маршрута Каскайс. Требует маршрут и составы (см. bundle-cascais).",
+      "depends": [
+        "cascais-route",
+        "cascais-tiles",
+        "cascais-sound",
+        "cascais-global-1",
+        "cascais-global-2",
+        "cascais-terrtex-1",
+        "cascais-terrtex-2",
+        "cascais-terrtex-3",
+        "cascais-terrtex-4",
+        "cascais-terrtex-5",
+        "cascais-textures-1",
+        "cascais-textures-2",
+        "cascais-textures-3"
+      ],
+      "addons": [],
+      "file": "packages/scenario-cascais-06sub19400_pt-1.0.0.zip",
+      "size": 4596,
+      "sha256": "dbc42f8cda8656af395dfcdb3ac54e26785b651aac454863435bd47a6bd920c5"
+    },
+    {
+      "id": "scenario-cascais-07ir807-6_pt",
+      "name": "Сценарий: 07ir807-6_pt",
+      "type": "scenario",
+      "version": "1.0.0",
+      "description": "Активность маршрута Каскайс. Требует маршрут и составы (см. bundle-cascais).",
+      "depends": [
+        "cascais-route",
+        "cascais-tiles",
+        "cascais-sound",
+        "cascais-global-1",
+        "cascais-global-2",
+        "cascais-terrtex-1",
+        "cascais-terrtex-2",
+        "cascais-terrtex-3",
+        "cascais-terrtex-4",
+        "cascais-terrtex-5",
+        "cascais-textures-1",
+        "cascais-textures-2",
+        "cascais-textures-3"
+      ],
+      "addons": [],
+      "file": "packages/scenario-cascais-07ir807-6_pt-1.0.0.zip",
+      "size": 3033,
+      "sha256": "bcc00220227cae24120d6735bb78248e35580aa65b6549987f1e213e647dd4ec"
+    },
+    {
+      "id": "scenario-cascais-08subesp39905_pt",
+      "name": "Сценарий: 08subesp39905_pt",
+      "type": "scenario",
+      "version": "1.0.0",
+      "description": "Активность маршрута Каскайс. Требует маршрут и составы (см. bundle-cascais).",
+      "depends": [
+        "cascais-route",
+        "cascais-tiles",
+        "cascais-sound",
+        "cascais-global-1",
+        "cascais-global-2",
+        "cascais-terrtex-1",
+        "cascais-terrtex-2",
+        "cascais-terrtex-3",
+        "cascais-terrtex-4",
+        "cascais-terrtex-5",
+        "cascais-textures-1",
+        "cascais-textures-2",
+        "cascais-textures-3"
+      ],
+      "addons": [],
+      "file": "packages/scenario-cascais-08subesp39905_pt-1.0.0.zip",
+      "size": 4771,
+      "sha256": "ecefed49cc3c13016d1d5dc148a4b895257822c41055760e8f9a8bede8bf0de4"
+    },
+    {
+      "id": "scenario-cascais-09sub19531_pt",
+      "name": "Сценарий: 09sub19531_pt",
+      "type": "scenario",
+      "version": "1.0.0",
+      "description": "Активность маршрута Каскайс. Требует маршрут и составы (см. bundle-cascais).",
+      "depends": [
+        "cascais-route",
+        "cascais-tiles",
+        "cascais-sound",
+        "cascais-global-1",
+        "cascais-global-2",
+        "cascais-terrtex-1",
+        "cascais-terrtex-2",
+        "cascais-terrtex-3",
+        "cascais-terrtex-4",
+        "cascais-terrtex-5",
+        "cascais-textures-1",
+        "cascais-textures-2",
+        "cascais-textures-3"
+      ],
+      "addons": [],
+      "file": "packages/scenario-cascais-09sub19531_pt-1.0.0.zip",
+      "size": 4304,
+      "sha256": "9f082af2ca653e96d54772193ccb1ecfba6503f6ddcf70aace276122b7cbb1ab"
+    },
+    {
+      "id": "scenario-cascais-10sub19287_pt",
+      "name": "Сценарий: 10sub19287_pt",
+      "type": "scenario",
+      "version": "1.0.0",
+      "description": "Активность маршрута Каскайс. Требует маршрут и составы (см. bundle-cascais).",
+      "depends": [
+        "cascais-route",
+        "cascais-tiles",
+        "cascais-sound",
+        "cascais-global-1",
+        "cascais-global-2",
+        "cascais-terrtex-1",
+        "cascais-terrtex-2",
+        "cascais-terrtex-3",
+        "cascais-terrtex-4",
+        "cascais-terrtex-5",
+        "cascais-textures-1",
+        "cascais-textures-2",
+        "cascais-textures-3"
+      ],
+      "addons": [],
+      "file": "packages/scenario-cascais-10sub19287_pt-1.0.0.zip",
+      "size": 4589,
+      "sha256": "e4dd0193e48e25e2ee0c1f4390703fb86aaa256b744850a85c593db5266acc7a"
+    },
+    {
+      "id": "scenario-cascais-11sub19659_pt",
+      "name": "Сценарий: 11sub19659_pt",
+      "type": "scenario",
+      "version": "1.0.0",
+      "description": "Активность маршрута Каскайс. Требует маршрут и составы (см. bundle-cascais).",
+      "depends": [
+        "cascais-route",
+        "cascais-tiles",
+        "cascais-sound",
+        "cascais-global-1",
+        "cascais-global-2",
+        "cascais-terrtex-1",
+        "cascais-terrtex-2",
+        "cascais-terrtex-3",
+        "cascais-terrtex-4",
+        "cascais-terrtex-5",
+        "cascais-textures-1",
+        "cascais-textures-2",
+        "cascais-textures-3"
+      ],
+      "addons": [],
+      "file": "packages/scenario-cascais-11sub19659_pt-1.0.0.zip",
+      "size": 3693,
+      "sha256": "241efe80a24833617e584a635853acafc356484a861393001535f7accecbab4f"
+    },
+    {
+      "id": "scenario-cascais-12tornodefosso_pt",
+      "name": "Сценарий: 12tornodefosso_pt",
+      "type": "scenario",
+      "version": "1.0.0",
+      "description": "Активность маршрута Каскайс. Требует маршрут и составы (см. bundle-cascais).",
+      "depends": [
+        "cascais-route",
+        "cascais-tiles",
+        "cascais-sound",
+        "cascais-global-1",
+        "cascais-global-2",
+        "cascais-terrtex-1",
+        "cascais-terrtex-2",
+        "cascais-terrtex-3",
+        "cascais-terrtex-4",
+        "cascais-terrtex-5",
+        "cascais-textures-1",
+        "cascais-textures-2",
+        "cascais-textures-3"
+      ],
+      "addons": [],
+      "file": "packages/scenario-cascais-12tornodefosso_pt-1.0.0.zip",
+      "size": 3272,
+      "sha256": "73b13af13805ff5064ab1b7850b16b004784e6504287535bef44eeffda0cfe50"
+    },
+    {
+      "id": "scenario-cascais-13obstrucao_pt",
+      "name": "Сценарий: 13Obstrucao_pt",
+      "type": "scenario",
+      "version": "1.0.0",
+      "description": "Активность маршрута Каскайс. Требует маршрут и составы (см. bundle-cascais).",
+      "depends": [
+        "cascais-route",
+        "cascais-tiles",
+        "cascais-sound",
+        "cascais-global-1",
+        "cascais-global-2",
+        "cascais-terrtex-1",
+        "cascais-terrtex-2",
+        "cascais-terrtex-3",
+        "cascais-terrtex-4",
+        "cascais-terrtex-5",
+        "cascais-textures-1",
+        "cascais-textures-2",
+        "cascais-textures-3"
+      ],
+      "addons": [],
+      "file": "packages/scenario-cascais-13obstrucao_pt-1.0.0.zip",
+      "size": 3319,
+      "sha256": "e7908b196248811cab82b41bd18beedc4cc5f454fb7d1c3b86e4522f547ccbac"
+    },
+    {
+      "id": "scenario-cascais-14servico19281_pt",
+      "name": "Сценарий: 14Servico19281_pt",
+      "type": "scenario",
+      "version": "1.0.0",
+      "description": "Активность маршрута Каскайс. Требует маршрут и составы (см. bundle-cascais).",
+      "depends": [
+        "cascais-route",
+        "cascais-tiles",
+        "cascais-sound",
+        "cascais-global-1",
+        "cascais-global-2",
+        "cascais-terrtex-1",
+        "cascais-terrtex-2",
+        "cascais-terrtex-3",
+        "cascais-terrtex-4",
+        "cascais-terrtex-5",
+        "cascais-textures-1",
+        "cascais-textures-2",
+        "cascais-textures-3"
+      ],
+      "addons": [],
+      "file": "packages/scenario-cascais-14servico19281_pt-1.0.0.zip",
+      "size": 3346,
+      "sha256": "7d9226cbe02ffde6cf1525043f85ac257e99d0a7f4c6fdff05ea94bd87f26ad4"
+    },
+    {
+      "id": "scenario-cascais-15servico19095_pt",
+      "name": "Сценарий: 15Servico19095_pt",
+      "type": "scenario",
+      "version": "1.0.0",
+      "description": "Активность маршрута Каскайс. Требует маршрут и составы (см. bundle-cascais).",
+      "depends": [
+        "cascais-route",
+        "cascais-tiles",
+        "cascais-sound",
+        "cascais-global-1",
+        "cascais-global-2",
+        "cascais-terrtex-1",
+        "cascais-terrtex-2",
+        "cascais-terrtex-3",
+        "cascais-terrtex-4",
+        "cascais-terrtex-5",
+        "cascais-textures-1",
+        "cascais-textures-2",
+        "cascais-textures-3"
+      ],
+      "addons": [],
+      "file": "packages/scenario-cascais-15servico19095_pt-1.0.0.zip",
+      "size": 3604,
+      "sha256": "5ccf587cca6672727277e240fa59ea1ce79f9a895583a5f704e1c05a00c3bccd"
+    },
+    {
+      "id": "scenario-redahel-m61_r-93526-hel-gdynia-2011",
+      "name": "Сценарий: m61_R-93526 Hel-Gdynia 2011",
+      "type": "scenario",
+      "version": "1.0.0",
+      "description": "Активность маршрута Реда—Хель. Требует маршрут (см. bundle-redahel) и подвижной состав.",
+      "depends": [
+        "redahel-route",
+        "redahel-tiles-1",
+        "redahel-tiles-2",
+        "redahel-tiles-3",
+        "redahel-textures-1",
+        "redahel-textures-2",
+        "redahel-textures-3",
+        "redahel-terrtex",
+        "redahel-sound"
+      ],
+      "addons": [],
+      "file": "packages/scenario-redahel-m61_r-93526-hel-gdynia-2011-1.0.0.zip",
+      "size": 1932,
+      "sha256": "6ea65b0c39db02533039e81a7a867f1a8b1bae9ca0b5339e350f416eff7bff17"
+    },
+    {
+      "id": "scenario-redahel-m61_skm59750-s1-wejcherowo-gdansk",
+      "name": "Сценарий: m61_SKM59750 S1 Wejcherowo-Gdansk",
+      "type": "scenario",
+      "version": "1.0.0",
+      "description": "Активность маршрута Реда—Хель. Требует маршрут (см. bundle-redahel) и подвижной состав.",
+      "depends": [
+        "redahel-route",
+        "redahel-tiles-1",
+        "redahel-tiles-2",
+        "redahel-tiles-3",
+        "redahel-textures-1",
+        "redahel-textures-2",
+        "redahel-textures-3",
+        "redahel-terrtex",
+        "redahel-sound"
+      ],
+      "addons": [],
+      "file": "packages/scenario-redahel-m61_skm59750-s1-wejcherowo-gdansk-1.0.0.zip",
+      "size": 3249,
+      "sha256": "e62770a84354fbd7eeb498692ba874418ca4f51bc4caf35f35cfdb345eea2a0c"
+    },
+    {
+      "id": "scenario-redahel-m61_skm95667-s1_gdansk-wejcherowo",
+      "name": "Сценарий: m61_SKM95667 S1_Gdansk-Wejcherowo",
+      "type": "scenario",
+      "version": "1.0.0",
+      "description": "Активность маршрута Реда—Хель. Требует маршрут (см. bundle-redahel) и подвижной состав.",
+      "depends": [
+        "redahel-route",
+        "redahel-tiles-1",
+        "redahel-tiles-2",
+        "redahel-tiles-3",
+        "redahel-textures-1",
+        "redahel-textures-2",
+        "redahel-textures-3",
+        "redahel-terrtex",
+        "redahel-sound"
+      ],
+      "addons": [],
+      "file": "packages/scenario-redahel-m61_skm95667-s1_gdansk-wejcherowo-1.0.0.zip",
+      "size": 2178,
+      "sha256": "67405e26934840e4280f17e6a964951f93bd1bfda68a31b78ee9d8272e709d91"
+    },
+    {
+      "id": "scenario-redahel-tlk-hel--katowice-2011",
+      "name": "Сценарий: TLK Hel- Katowice 2011",
+      "type": "scenario",
+      "version": "1.0.0",
+      "description": "Активность маршрута Реда—Хель. Требует маршрут (см. bundle-redahel) и подвижной состав.",
+      "depends": [
+        "redahel-route",
+        "redahel-tiles-1",
+        "redahel-tiles-2",
+        "redahel-tiles-3",
+        "redahel-textures-1",
+        "redahel-textures-2",
+        "redahel-textures-3",
+        "redahel-terrtex",
+        "redahel-sound"
+      ],
+      "addons": [],
+      "file": "packages/scenario-redahel-tlk-hel--katowice-2011-1.0.0.zip",
+      "size": 1400,
+      "sha256": "f917eff7b7584d25025d45da41b1804a85b0786a3dc31e4ac4b97f9370685844"
+    },
+    {
+      "id": "train-cp0450",
+      "name": "Состав CP0450",
+      "type": "mod",
+      "version": "1.0.0",
+      "description": "Подвижной состав CP0450 (комплект Каскайс). Источник: cpvirtual/OR_CPV_Cascais, GPL-3.0.",
+      "depends": [
+        "cascais-global-1",
+        "cascais-global-2"
+      ],
+      "addons": [],
+      "file": "packages/train-cp0450-1.0.0.zip",
+      "size": 7005600,
+      "sha256": "c97f93339dd5c272f02cca568edd13701936497553de27d18477cfb89d11cbb5"
+    },
+    {
+      "id": "train-cp1150",
+      "name": "Состав CP1150",
+      "type": "mod",
+      "version": "1.0.0",
+      "description": "Подвижной состав CP1150 (комплект Каскайс). Источник: cpvirtual/OR_CPV_Cascais, GPL-3.0.",
+      "depends": [
+        "cascais-global-1",
+        "cascais-global-2"
+      ],
+      "addons": [],
+      "file": "packages/train-cp1150-1.0.0.zip",
+      "size": 25823994,
+      "sha256": "97beeafb834f845f7aa96b72472f5be34572380b3aca882cdd1d037ed0c97d0a"
+    },
+    {
+      "id": "train-cp1200",
+      "name": "Состав CP1200",
+      "type": "mod",
+      "version": "1.0.0",
+      "description": "Подвижной состав CP1200 (комплект Каскайс). Источник: cpvirtual/OR_CPV_Cascais, GPL-3.0.",
+      "depends": [
+        "cascais-global-1",
+        "cascais-global-2"
+      ],
+      "addons": [],
+      "file": "packages/train-cp1200-1.0.0.zip",
+      "size": 5007986,
+      "sha256": "f536ca5109bbda554c6bc991c306c5424ebc713a10b81f0c91b831ca62e13193"
+    },
+    {
+      "id": "train-cp1400",
+      "name": "Состав CP1400",
+      "type": "mod",
+      "version": "1.0.0",
+      "description": "Подвижной состав CP1400 (комплект Каскайс). Источник: cpvirtual/OR_CPV_Cascais, GPL-3.0.",
+      "depends": [
+        "cascais-global-1",
+        "cascais-global-2"
+      ],
+      "addons": [],
+      "file": "packages/train-cp1400-1.0.0.zip",
+      "size": 24802813,
+      "sha256": "75209c9aa0568ea199eabab8cc81a82c05f989fe9d563debcf5d0d43aeec0e2d"
+    },
+    {
+      "id": "train-cp1900",
+      "name": "Состав CP1900",
+      "type": "mod",
+      "version": "1.0.0",
+      "description": "Подвижной состав CP1900 (комплект Каскайс). Источник: cpvirtual/OR_CPV_Cascais, GPL-3.0.",
+      "depends": [
+        "cascais-global-1",
+        "cascais-global-2"
+      ],
+      "addons": [],
+      "file": "packages/train-cp1900-1.0.0.zip",
+      "size": 9933237,
+      "sha256": "e9309c44fc504491960daacd391b4ac8f677592b6ed2e3a9db364022fe5bd040"
+    },
+    {
+      "id": "train-cp3250",
+      "name": "Состав Cp3250",
+      "type": "mod",
+      "version": "1.0.0",
+      "description": "Подвижной состав Cp3250 (комплект Каскайс). Источник: cpvirtual/OR_CPV_Cascais, GPL-3.0.",
+      "depends": [
+        "cascais-global-1",
+        "cascais-global-2"
+      ],
+      "addons": [],
+      "file": "packages/train-cp3250-1.0.0.zip",
+      "size": 11111990,
+      "sha256": "ff3623a7cef77327834db990b6895f5836d763c2638547a1e1a14d6cb899bd27"
+    },
+    {
+      "id": "train-cp3500",
+      "name": "Состав Cp3500",
+      "type": "mod",
+      "version": "1.0.0",
+      "description": "Подвижной состав Cp3500 (комплект Каскайс). Источник: cpvirtual/OR_CPV_Cascais, GPL-3.0.",
+      "depends": [
+        "cascais-global-1",
+        "cascais-global-2"
+      ],
+      "addons": [],
+      "file": "packages/train-cp3500-1.0.0.zip",
+      "size": 1708662,
+      "sha256": "f25c6f1c784d62e5e2181054763b4e0c1e832b0122a65e9aeecccd6eab94e7d5"
+    },
+    {
+      "id": "train-cp4000",
+      "name": "Состав Cp4000",
+      "type": "mod",
+      "version": "1.0.0",
+      "description": "Подвижной состав Cp4000 (комплект Каскайс). Источник: cpvirtual/OR_CPV_Cascais, GPL-3.0.",
+      "depends": [
+        "cascais-global-1",
+        "cascais-global-2"
+      ],
+      "addons": [],
+      "file": "packages/train-cp4000-1.0.0.zip",
+      "size": 20262814,
+      "sha256": "32e8df7b0c8a59d17f89f3f359d7737580e3134c4d148387788a426710f28292"
+    },
+    {
+      "id": "train-cp5600",
+      "name": "Состав CP5600",
+      "type": "mod",
+      "version": "1.0.0",
+      "description": "Подвижной состав CP5600 (комплект Каскайс). Источник: cpvirtual/OR_CPV_Cascais, GPL-3.0.",
+      "depends": [
+        "cascais-global-1",
+        "cascais-global-2"
+      ],
+      "addons": [],
+      "file": "packages/train-cp5600-1.0.0.zip",
+      "size": 15176636,
+      "sha256": "49e505c6ccdac5e7095c88016787045f9819f88ac969103987e845fd182e08bf"
+    },
+    {
+      "id": "train-cpcarelfouche",
+      "name": "Состав CPcarelfouche",
+      "type": "mod",
+      "version": "1.0.0",
+      "description": "Подвижной состав CPcarelfouche (комплект Каскайс). Источник: cpvirtual/OR_CPV_Cascais, GPL-3.0.",
+      "depends": [
+        "cascais-global-1",
+        "cascais-global-2"
+      ],
+      "addons": [],
+      "file": "packages/train-cpcarelfouche-1.0.0.zip",
+      "size": 976133,
+      "sha256": "152c76fc3f170f5184cb6cbf30e6fd253e722c250b51e2ad6acdc9e26c19970e"
+    },
+    {
+      "id": "train-cpciwl",
+      "name": "Состав CPciwl",
+      "type": "mod",
+      "version": "1.0.0",
+      "description": "Подвижной состав CPciwl (комплект Каскайс). Источник: cpvirtual/OR_CPV_Cascais, GPL-3.0.",
+      "depends": [
+        "cascais-global-1",
+        "cascais-global-2"
+      ],
+      "addons": [],
+      "file": "packages/train-cpciwl-1.0.0.zip",
+      "size": 797738,
+      "sha256": "5c218f0d6b172fb3a9e5296cbf291acd789bc62b10ee7a4f363ecd2e2eea6e3a"
+    },
+    {
+      "id": "train-cpdf730",
+      "name": "Состав CPDF730",
+      "type": "mod",
+      "version": "1.0.0",
+      "description": "Подвижной состав CPDF730 (комплект Каскайс). Источник: cpvirtual/OR_CPV_Cascais, GPL-3.0.",
+      "depends": [
+        "cascais-global-1",
+        "cascais-global-2"
+      ],
+      "addons": [],
+      "file": "packages/train-cpdf730-1.0.0.zip",
+      "size": 2259928,
+      "sha256": "cf41e078f0ab623a7253a4387954f168b8f5647357667bf66768c0e2e85f6ee5"
+    },
+    {
+      "id": "train-cpdietrich",
+      "name": "Состав CPDietrich",
+      "type": "mod",
+      "version": "1.0.0",
+      "description": "Подвижной состав CPDietrich (комплект Каскайс). Источник: cpvirtual/OR_CPV_Cascais, GPL-3.0.",
+      "depends": [
+        "cascais-global-1",
+        "cascais-global-2"
+      ],
+      "addons": [],
+      "file": "packages/train-cpdietrich-1.0.0.zip",
+      "size": 8813229,
+      "sha256": "06be9e20d9137fdfbc1d866a660991793f7748c6f852591203dd4467e3bcc6ee"
+    },
+    {
+      "id": "train-cpgkks",
+      "name": "Состав CpGkks",
+      "type": "mod",
+      "version": "1.0.0",
+      "description": "Подвижной состав CpGkks (комплект Каскайс). Источник: cpvirtual/OR_CPV_Cascais, GPL-3.0.",
+      "depends": [
+        "cascais-global-1",
+        "cascais-global-2"
+      ],
+      "addons": [],
+      "file": "packages/train-cpgkks-1.0.0.zip",
+      "size": 118231,
+      "sha256": "0d8d19d22d7327650c2ee6005b92e122c4830de336e3648a77aa812688bc0375"
+    },
+    {
+      "id": "train-cpgruas",
+      "name": "Состав CpGruas",
+      "type": "mod",
+      "version": "1.0.0",
+      "description": "Подвижной состав CpGruas (комплект Каскайс). Источник: cpvirtual/OR_CPV_Cascais, GPL-3.0.",
+      "depends": [
+        "cascais-global-1",
+        "cascais-global-2"
+      ],
+      "addons": [],
+      "file": "packages/train-cpgruas-1.0.0.zip",
+      "size": 159346,
+      "sha256": "3f49cdc2c48cdd4a23141b0aa95ba6f329d1725e3b0a279fa03c87fbb8168344"
+    },
+    {
+      "id": "train-cpplataformas",
+      "name": "Состав CPplataformas",
+      "type": "mod",
+      "version": "1.0.0",
+      "description": "Подвижной состав CPplataformas (комплект Каскайс). Источник: cpvirtual/OR_CPV_Cascais, GPL-3.0.",
+      "depends": [
+        "cascais-global-1",
+        "cascais-global-2"
+      ],
+      "addons": [],
+      "file": "packages/train-cpplataformas-1.0.0.zip",
+      "size": 7792623,
+      "sha256": "84aa39bfb7a36ce7dac3ac6d2325bb21d9d505389f392a8f22fd38a5efd29c75"
+    },
+    {
+      "id": "train-cpsggmrss",
+      "name": "Состав CpSggmrss",
+      "type": "mod",
+      "version": "1.0.0",
+      "description": "Подвижной состав CpSggmrss (комплект Каскайс). Источник: cpvirtual/OR_CPV_Cascais, GPL-3.0.",
+      "depends": [
+        "cascais-global-1",
+        "cascais-global-2"
+      ],
+      "addons": [],
+      "file": "packages/train-cpsggmrss-1.0.0.zip",
+      "size": 779930,
+      "sha256": "36207ac9063704e793f8e757f1f8a6ea7a0e2074c0fbd65ebadf04dcbce468b6"
+    },
+    {
+      "id": "train-cpsorefame",
+      "name": "Состав CPSorefame",
+      "type": "mod",
+      "version": "1.0.0",
+      "description": "Подвижной состав CPSorefame (комплект Каскайс). Источник: cpvirtual/OR_CPV_Cascais, GPL-3.0.",
+      "depends": [
+        "cascais-global-1",
+        "cascais-global-2"
+      ],
+      "addons": [],
+      "file": "packages/train-cpsorefame-1.0.0.zip",
+      "size": 10200835,
+      "sha256": "5b197e0a0cf6885df835e7dd54c167259926291e3cd4450800e920f6484854e9"
+    },
+    {
+      "id": "train-cpv.containerdata",
+      "name": "Состав CPV.containerdata",
+      "type": "mod",
+      "version": "1.0.0",
+      "description": "Подвижной состав CPV.containerdata (комплект Каскайс). Источник: cpvirtual/OR_CPV_Cascais, GPL-3.0.",
+      "depends": [
+        "cascais-global-1",
+        "cascais-global-2"
+      ],
+      "addons": [],
+      "file": "packages/train-cpv.containerdata-1.0.0.zip",
+      "size": 12071575,
+      "sha256": "69779dc60a48a8bac54f3f85ba2042b2e262ba19c3f7020cd7a1945274b81338"
+    },
+    {
+      "id": "train-cpvblind",
+      "name": "Состав CPVBlind",
+      "type": "mod",
+      "version": "1.0.0",
+      "description": "Подвижной состав CPVBlind (комплект Каскайс). Источник: cpvirtual/OR_CPV_Cascais, GPL-3.0.",
+      "depends": [
+        "cascais-global-1",
+        "cascais-global-2"
+      ],
+      "addons": [],
+      "file": "packages/train-cpvblind-1.0.0.zip",
+      "size": 21651,
+      "sha256": "ffc7b81747e11a753fd8bc195325d5a1fcab6d3369e3945dc46effebcea5fa62"
+    },
+    {
+      "id": "train-sebaumemarpent",
+      "name": "Состав SEBaumemarpent",
+      "type": "mod",
+      "version": "1.0.0",
+      "description": "Подвижной состав SEBaumemarpent (комплект Каскайс). Источник: cpvirtual/OR_CPV_Cascais, GPL-3.0.",
+      "depends": [
+        "cascais-global-1",
+        "cascais-global-2"
+      ],
+      "addons": [],
+      "file": "packages/train-sebaumemarpent-1.0.0.zip",
+      "size": 28372712,
+      "sha256": "4a7363f2cc7582edc467defb8e928c0031d1fcb479c2525dbcd2d4b62e6f8cf8"
+    },
+    {
+      "id": "train-selocomotives",
+      "name": "Состав SELocomotives",
+      "type": "mod",
+      "version": "1.0.0",
+      "description": "Подвижной состав SELocomotives (комплект Каскайс). Источник: cpvirtual/OR_CPV_Cascais, GPL-3.0.",
+      "depends": [
+        "cascais-global-1",
+        "cascais-global-2"
+      ],
+      "addons": [],
+      "file": "packages/train-selocomotives-1.0.0.zip",
+      "size": 42830179,
+      "sha256": "d13232aa43135526616001dc73854eae1a87025770b6e4f02856bb45a059ac4a"
+    },
+    {
+      "id": "base-tsection",
+      "name": "tsection.dat (стандартный)",
+      "type": "base",
+      "version": "1.0.0",
+      "description": "Стандартный файл путей tsection.dat. Источник: github.com/perpetualKid/tsection.dat, CC0.",
+      "depends": [],
+      "addons": [],
+      "file": "packages/base-tsection-1.0.0.zip",
+      "size": 346021,
+      "sha256": "828d6b2c4b4fe870ff83ee0ec262326f8467edf755f314f87096c6ba94e9fc83"
+    }
+  ]
+}
