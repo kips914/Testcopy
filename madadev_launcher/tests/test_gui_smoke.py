@@ -8,10 +8,12 @@
 
 from __future__ import annotations
 
+import json
 import os
 import sys
 import tempfile
 import time
+import zipfile
 
 TESTS_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE = os.path.dirname(TESTS_DIR)
@@ -53,6 +55,10 @@ def log_errors(app):
 
 
 def main_test():
+    # Демо-репозиторий по умолчанию ВЫКЛЮЧЕН — для теста включаем явно.
+    with open(os.path.join(BASE, "config.json"), "w", encoding="utf-8") as f:
+        json.dump({"use_demo_repo": True}, f)
+
     root = tk.Tk()
     app = launcher.LauncherApp(root)
 
@@ -170,6 +176,36 @@ def main_test():
           pump(app, lambda: not app.job_running and
                app.status_var.get() == "Всё уже установлено — обновлений нет"),
           app.status_var.get())
+
+    # 8b. Реальная установка из архива (без репозитория, без демо)
+    src_dir = tempfile.mkdtemp(prefix="rts_local_src_")
+    local_zip = os.path.join(src_dir, "LocalRoute.zip")
+    with zipfile.ZipFile(local_zip, "w") as zf:
+        zf.writestr("mddl.json", json.dumps({
+            "id": "local-route",
+            "name": "Локальный маршрут",
+            "type": "map",
+            "version": "1.0.0",
+        }, ensure_ascii=False))
+        zf.writestr("ROUTES/LocalRoute/routes.txt",
+                    "[route]\nName=LocalRoute\n")
+        zf.writestr("TRAINS/TRAINSET/Local/model.sd", b"\x00\x01\x02")
+    app.install_local_package(local_zip, kind="archive")
+    check("локальная задача стартовала", app.job_running)
+    check("локальная установка завершилась",
+          pump(app, lambda: not app.job_running and
+               app.status_var.get().startswith("Установлено:")),
+          app.status_var.get())
+    check("файл локального пакета установлен",
+          os.path.isfile(os.path.join(game, "ROUTES", "LocalRoute",
+                                       "routes.txt")))
+    check("локальный пакет в реестре",
+          "local-route" in app.installer.installed())
+    check("mddl.json не в игре",
+          not os.path.isfile(os.path.join(game, "mddl.json")))
+    app._refresh_installed()
+    check("локальный пакет в списке установленных",
+          "local-route" in app.inst_tree._rows)
 
     # 9. Настройки: зеркала (без диалогов), кеш, авто-галочки
     app._activate_mirror()   # без выделения — no-op

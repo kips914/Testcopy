@@ -38,7 +38,8 @@ except ImportError:  # pragma: no cover
 from core import paths as app_paths
 from core.config import Config
 from core.demo import ensure_demo_repo
-from core.install import Installer, fmt_size
+from core.install import (Installer, fmt_size, looks_like_game_tree,
+                          read_package_meta)
 from core.manifest import TYPE_LABELS, Manifest, load_manifest, resolve
 from core.net import Cancelled, RepoClient
 
@@ -271,6 +272,12 @@ class LauncherApp:
         self.btn_check_updates = ttk.Button(bar, text="🔍 Проверить обновления",
                                             command=self._check_updates)
         self.btn_check_updates.pack(side="left")
+        self.btn_local_archive = ttk.Button(bar, text="📥 Установить из архива…",
+                                            command=self.install_from_archive)
+        self.btn_local_archive.pack(side="left", padx=(8, 0))
+        self.btn_local_folder = ttk.Button(bar, text="📁 Установить из папки…",
+                                           command=self.install_from_folder)
+        self.btn_local_folder.pack(side="left", padx=(8, 0))
         self.btn_uninstall = ttk.Button(bar, text="🗑 Удалить выбранное",
                                         style="Danger.TButton",
                                         command=self._uninstall_selected)
@@ -352,7 +359,8 @@ class LauncherApp:
         self.demo_var = tk.BooleanVar(value=bool(self.cfg.get("use_demo_repo")))
         ttk.Checkbutton(
             self.tab_settings,
-            text="Встроенный демо-каталог (офлайн, для проверки лаунчера)",
+            text="Демо-каталог-заглушка (только для проверки лаунчера, "
+                 "не для игры; по умолчанию выключен)",
             variable=self.demo_var,
             command=self._toggle_demo,
         ).grid(row=row, column=0, columnspan=3, sticky="w", **pad)
@@ -748,6 +756,79 @@ class LauncherApp:
             self.q.put(("job_done", False, f"Ошибка: {exc}"))
 
     # ------------------------------------------------------------------ #
+    # Реальная установка из архивов и папок (без репозитория)
+    # ------------------------------------------------------------------ #
+    def install_from_archive(self) -> None:
+        path = filedialog.askopenfilename(
+            title="Выбери архив мода или карты (.zip)",
+            filetypes=[("Архивы ZIP", "*.zip"), ("Все файлы", "*.*")],
+            parent=self.root,
+        )
+        if path:
+            self.install_local_package(path, kind="archive")
+
+    def install_from_folder(self) -> None:
+        path = filedialog.askdirectory(
+            title="Выбери папку пакета (ROUTES / TRAINS / GLOBAL)",
+            parent=self.root,
+        )
+        if not path:
+            return
+        try:
+            top = os.listdir(path)
+        except OSError as exc:
+            messagebox.showerror(APP_TITLE,
+                                 f"Не удалось прочитать папку:\n{exc}",
+                                 parent=self.root)
+            return
+        if not looks_like_game_tree(top):
+            if not messagebox.askyesno(
+                APP_TITLE,
+                "В папке нет игровых каталогов (ROUTES, TRAINS, GLOBAL, "
+                "SOUNDS).\nВсё равно установить её содержимое в папку игры?",
+                parent=self.root,
+            ):
+                return
+        self.install_local_package(path, kind="folder")
+
+    def install_local_package(self, path: str, kind: str = "archive") -> None:
+        """Поставить реальный пакет из .zip или папки — без репозитория."""
+        if self.job_running:
+            return
+        if not self.installer.ready:
+            messagebox.showwarning(
+                APP_TITLE,
+                "Сначала укажи папку с игрой во вкладке «Настройки».",
+                parent=self.root,
+            )
+            self.notebook.select(self.tab_settings)
+            return
+        self.job_cancel.clear()
+        self.job_running = True
+        self._set_busy(True)
+        label = os.path.basename(path.rstrip("/\\"))
+        self.log(f"— Установка из {'архива' if kind == 'archive' else 'папки'}: "
+                 f"{label} —", "muted")
+        threading.Thread(target=self._local_install_worker,
+                         args=(path, kind), daemon=True).start()
+
+    def _local_install_worker(self, path: str, kind: str) -> None:
+        q = self.q
+        try:
+            meta = read_package_meta(path)
+            entry = self.installer.install_local(path, meta)
+            src = "архива" if kind == "archive" else "папки"
+            q.put(("log",
+                   f"✓ Установлено из {src}: {entry['name']} "
+                   f"({TYPE_LABELS.get(entry['type'], entry['type'])}, "
+                   f"{entry['version']}) — файлов: {len(entry['files'])}", "ok"))
+            q.put(("job_done", True,
+                   f"Установлено: {entry['name']} {entry['version']}"))
+        except Exception as exc:  # noqa: BLE001
+            q.put(("log", traceback.format_exc(), "err"))
+            q.put(("job_done", False, f"Ошибка установки: {exc}"))
+
+    # ------------------------------------------------------------------ #
     # Запуск игры
     # ------------------------------------------------------------------ #
     def _find_game_exe(self, game_dir: str) -> str:
@@ -834,7 +915,8 @@ class LauncherApp:
         state = ["disabled"] if busy else ["!disabled"]
         for btn in (self.btn_install_sel, self.btn_install_all,
                     self.btn_update_sel, self.btn_uninstall,
-                    self.btn_check_updates, self.btn_refresh):
+                    self.btn_check_updates, self.btn_refresh,
+                    self.btn_local_archive, self.btn_local_folder):
             btn.state(state)
         if busy:
             # Кнопка отмены подменяет «Обновить каталог» на время задачи
@@ -904,7 +986,8 @@ class LauncherApp:
                     messagebox.showwarning(
                         APP_TITLE,
                         f"Не удалось загрузить каталог:\n{msg[1]}\n\n"
-                        "Проверь зеркала во вкладке «Настройки».",
+                        "Добавь зеркало во вкладке «Настройки» либо установи "
+                        "пакет из архива/папки (вкладка «Установленные»).",
                         parent=self.root,
                     )
                 elif kind == "job_done":

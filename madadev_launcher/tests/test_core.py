@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Функциональное тестирование ядра лаунчера (без GUI)."""
+import json
 import os
 import sys
 import tempfile
@@ -10,7 +11,9 @@ sys.path.insert(0, BASE)
 
 from core.config import Config
 from core.demo import ensure_demo_repo, build_demo_repo
-from core.install import Installer, fmt_size, version_cmp
+from core.install import (Installer, fmt_size, guess_package_type,
+                          read_package_meta, sanitize_package_id,
+                          version_cmp)
 from core.manifest import load_manifest, resolve, ManifestError
 from core.net import RepoClient, RepoError, sha256_file
 
@@ -239,6 +242,167 @@ with tempfile.TemporaryDirectory() as tmp4:
         check("empty packages raises", False)
     except ManifestError:
         check("empty packages raises", True)
+
+# 9. Реальная установка из архива/папки (без репозитория)
+with tempfile.TemporaryDirectory() as tmp5:
+    game = os.path.join(tmp5, "game")
+    os.makedirs(game)
+    inst = Installer(game)
+
+    # Архив с mddl.json и настоящими бинарными файлами
+    zp = os.path.join(tmp5, "RealRoute.zip")
+    with zipfile.ZipFile(zp, "w") as zf:
+        zf.writestr("mddl.json", json.dumps({
+            "id": "Real Route!",
+            "name": "Реальный маршрут",
+            "type": "map",
+            "version": "2.1.0",
+            "depends": ["base-assets"],
+            "addons": ["sound-x"],
+        }, ensure_ascii=False))
+        zf.writestr("ROUTES/RealRoute/routes.txt", "[route]\nName=Real\n")
+        zf.writestr("TRAINS/TRAINSET/X/model.sd", b"\x00\x01\x02\x03")
+
+    meta = read_package_meta(zp)
+    check("meta из архива", meta.get("name") == "Реальный маршрут")
+    entry = inst.install_local(zp, meta)
+    check("id санитайзен", entry["id"] == "real-route", entry["id"])
+    check("тип из meta", entry["type"] == "map")
+    check("версия из meta", entry["version"] == "2.1.0")
+    check("файл установлен",
+          os.path.isfile(os.path.join(game, "ROUTES", "RealRoute",
+                                       "routes.txt")))
+    with open(os.path.join(game, "TRAINS", "TRAINSET", "X", "model.sd"),
+              "rb") as f:
+        check("бинарный файл цел", f.read() == b"\x00\x01\x02\x03")
+    check("mddl.json не в игре",
+          not os.path.isfile(os.path.join(game, "mddl.json")))
+    check("запись в реестре",
+          inst.installed().get("real-route", {}).get("version") == "2.1.0")
+    check("source=archive",
+          inst.installed()["real-route"].get("source") == "archive")
+
+    # Переустановка другой версии убирает старые файлы
+    zp2 = os.path.join(tmp5, "RealRoute_v2.zip")
+    with zipfile.ZipFile(zp2, "w") as zf:
+        zf.writestr("mddl.json", json.dumps({
+            "id": "real-route", "version": "3.0.0"}))
+        zf.writestr("ROUTES/RealRoute/routes.txt", "[route]\nName=Real v2\n")
+    inst.install_local(zp2, read_package_meta(zp2))
+    check("обновление локального пакета",
+          inst.installed()["real-route"]["version"] == "3.0.0")
+    check("старые файлы перезаписаны",
+          os.path.isfile(os.path.join(game, "ROUTES", "RealRoute",
+                                       "routes.txt")))
+
+    # Папка без метаданных: id/тип выводятся автоматически
+    fld = os.path.join(tmp5, "MyMod")
+    os.makedirs(os.path.join(fld, "GLOBAL", "extra"))
+    with open(os.path.join(fld, "GLOBAL", "extra", "x.txt"), "w") as f:
+        f.write("x")
+    e2 = inst.install_local(fld)
+    check("папка: тип по структуре", e2["type"] == "addon", e2["type"])
+    check("папка: source=folder", e2["source"] == "folder")
+    check("папка установлена",
+          os.path.isfile(os.path.join(game, "GLOBAL", "extra", "x.txt")))
+
+    # Тип определяется по содержимому
+    check("guess: scenario",
+          guess_package_type(["ROUTES/R/ACTIVITIES/a.txt"]) == "scenario")
+    check("guess: map",
+          guess_package_type(["ROUTES/R/routes.txt"]) == "map")
+
+    # Защита от zip-slip в локальной установке
+    evil = os.path.join(tmp5, "evil_local.zip")
+    with zipfile.ZipFile(evil, "w") as zf:
+        zf.writestr("../hack.txt", "x")
+    try:
+        inst.install_local(evil)
+        check("local zip-slip blocked", False)
+    except RuntimeError:
+        check("local zip-slip blocked", True)
+    check("нет файла вне игры",
+          not os.path.isfile(os.path.join(tmp5, "hack.txt")))
+
+    # Архив без файлов игры — отказ
+    empty = os.path.join(tmp5, "empty.zip")
+    with zipfile.ZipFile(empty, "w") as zf:
+        zf.writestr("mddl.json", "{}")
+    try:
+        inst.install_local(empty)
+        check("пустой архив отклонён", False)
+    except RuntimeError:
+        check("пустой архив отклонён", True)
+
+    check("sanitize id",
+          sanitize_package_id("My Cool Mod!") == "my-cool-mod",
+          sanitize_package_id("My Cool Mod!"))
+
+# 10. make_repo: папка с реальными пакетами -> репозиторий -> установка
+from tools.make_repo import build_repo  # noqa: E402
+
+with tempfile.TemporaryDirectory() as tmp6:
+    src = os.path.join(tmp6, "mods")
+    os.makedirs(src)
+
+    # Пакет-папка (реальная структура карты)
+    pkg = os.path.join(src, "cool_route")
+    os.makedirs(os.path.join(pkg, "ROUTES", "CoolRoute"))
+    with open(os.path.join(pkg, "ROUTES", "CoolRoute", "routes.txt"),
+              "w") as f:
+        f.write("[route]\nName=Cool\n")
+    with open(os.path.join(pkg, "mddl.json"), "w", encoding="utf-8") as f:
+        json.dump({"id": "cool-route", "name": "Крутой маршрут",
+                   "type": "map", "version": "1.4.0",
+                   "depends": ["sound-pack"]}, f, ensure_ascii=False)
+
+    # Пакет-архив (дополнение)
+    zsrc = os.path.join(src, "sound_pack.zip")
+    with zipfile.ZipFile(zsrc, "w") as zf:
+        zf.writestr("mddl.json", json.dumps({
+            "id": "sound-pack", "name": "Звуки",
+            "type": "addon", "version": "3.0.0"}))
+        zf.writestr("GLOBAL/SOUNDS/pack.txt", "sound-data")
+
+    repo = os.path.join(tmp6, "repo")
+    entries = build_repo(src, repo, verbose=False)
+    check("make_repo: 2 пакета", len(entries) == 2, str(len(entries)))
+
+    m = load_manifest(RepoClient([repo]))
+    check("make_repo: манифест читается", len(m.packages) == 2)
+    check("make_repo: версии из mddl.json",
+          m.get("cool-route").version == "1.4.0"
+          and m.get("sound-pack").version == "3.0.0")
+    check("make_repo: sha256 сходится",
+          all(p.sha256 for p in m.packages))
+
+    # Полный реальный цикл: зеркало -> скачать -> проверить -> установить
+    g2 = os.path.join(tmp6, "game2")
+    os.makedirs(g2)
+    inst2 = Installer(g2)
+    dl = RepoClient([repo])
+    pkgs, _, _ = resolve(m, ["cool-route"], auto_addons=True)
+    ids = [p.id for p in pkgs]
+    check("make_repo: depends тянет звуки", "sound-pack" in ids, str(ids))
+    for p in pkgs:
+        dest = inst2.cache_path(p)
+        os.makedirs(os.path.dirname(dest), exist_ok=True)
+        dl.download(p.file, dest, sha256=p.sha256)
+        inst2.install_package(p, dest)
+    check("реальный цикл: файлы на месте",
+          os.path.isfile(os.path.join(g2, "ROUTES", "CoolRoute",
+                                       "routes.txt"))
+          and os.path.isfile(os.path.join(g2, "GLOBAL", "SOUNDS",
+                                          "pack.txt")))
+    check("реальный цикл: реестр", len(inst2.installed()) == 2)
+    # mddl.json из пакета не должен попасть в игру
+    check("реальный цикл: mddl.json не установлен",
+          not os.path.isfile(os.path.join(g2, "mddl.json")))
+
+# 11. Демо отключено по умолчанию (в продукте только реальный контент)
+with tempfile.TemporaryDirectory() as tmp7:
+    cfg = Config(os.path.join(tmp7, "config.json"))
+    check("демо выключено по умолчанию", cfg.get("use_demo_repo") is False)
 
 print()
 if fails:

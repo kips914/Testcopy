@@ -15,6 +15,7 @@ import shutil
 import zipfile
 from datetime import datetime, timezone
 
+from .manifest import KNOWN_TYPES
 from .net import sha256_file
 
 
@@ -47,6 +48,55 @@ def version_cmp(a: str, b: str) -> int:
     va = va + (0,) * (length - len(va))
     vb = vb + (0,) * (length - len(vb))
     return (va > vb) - (va < vb)
+
+
+# ---------------------------------------------------------------------------
+# Реальная установка из локальных источников (архивы, папки)
+# ---------------------------------------------------------------------------
+
+def sanitize_package_id(raw) -> str:
+    """Чистый id пакета: a-z, 0-9, точка, дефис, подчёркивание."""
+    raw = str(raw or "").strip().lower()
+    raw = re.sub(r"[^a-z0-9._-]+", "-", raw)
+    return raw.strip("-._") or "package"
+
+
+def read_package_meta(source) -> dict:
+    """Прочитать ``mddl.json`` из архива или папки. Пустой dict, если нет."""
+    try:
+        if os.path.isfile(source) and zipfile.is_zipfile(source):
+            with zipfile.ZipFile(source) as zf:
+                if "mddl.json" in zf.namelist():
+                    data = json.loads(zf.read("mddl.json").decode("utf-8-sig"))
+                    return data if isinstance(data, dict) else {}
+        elif os.path.isdir(source):
+            path = os.path.join(source, "mddl.json")
+            if os.path.isfile(path):
+                with open(path, "r", encoding="utf-8-sig") as f:
+                    data = json.load(f)
+                return data if isinstance(data, dict) else {}
+    except Exception:  # noqa: BLE001 — битый meta не должен ронять установку
+        return {}
+    return {}
+
+
+def guess_package_type(rel_paths) -> str:
+    """Определить тип пакета по структуре файлов."""
+    lower = [str(p).replace("\\", "/").lower() for p in rel_paths]
+    if any(p.startswith("routes/") and "/activities/" in p for p in lower):
+        return "scenario"
+    if any(p.startswith("routes/") for p in lower):
+        return "map"
+    if any(p.startswith("trains/") for p in lower):
+        return "mod"
+    return "addon"
+
+
+def looks_like_game_tree(names) -> bool:
+    """Есть ли среди верхнеуровневых записей игровые каталоги."""
+    tops = {str(n).replace("\\", "/").split("/")[0].lower()
+            for n in names if str(n).strip()}
+    return bool(tops & {"routes", "trains", "global", "sounds"})
 
 
 class Installer:
@@ -165,7 +215,8 @@ class Installer:
         new_files = []
 
         with zipfile.ZipFile(zip_path, "r") as zf:
-            infos = self._safe_names(zf)
+            infos = [i for i in self._safe_names(zf)
+                     if i.filename.replace("\\", "/").lower() != "mddl.json"]
             total = len(infos) or 1
             for idx, info in enumerate(infos, 1):
                 target = os.path.join(self.game_dir, *info.filename.replace("\\", "/").split("/"))
@@ -233,6 +284,116 @@ class Installer:
         self._remove_files(entry.get("files") or [])
         self._save_state(state)
         return True
+
+    # ------------------------------------------------------------------ #
+    # Реальная установка из .zip / папки (без репозитория)
+    # ------------------------------------------------------------------ #
+    def install_local(self, source, meta=None, progress=None) -> dict:
+        """Установить реальный пакет из архива или папки в папку игры.
+
+        * ``source`` — путь к ``.zip`` либо к папке с игровой структурой
+          (``ROUTES/…``, ``TRAINS/…``, ``GLOBAL/…``);
+        * ``meta`` — метаданные (обычно из ``mddl.json``): ``id``, ``name``,
+          ``type``, ``version``, ``description``, ``depends``, ``addons``.
+          Без них id/имя берутся из имени файла, тип определяется по
+          структуре файлов;
+        * файл ``mddl.json`` — метаданные, в игру не распаковывается.
+
+        Возвращает запись реестра установленного.
+        """
+        if not self.ready:
+            raise RuntimeError("не выбрана папка с игрой")
+        source = os.path.abspath(source)
+        meta = dict(meta or {})
+        is_zip = os.path.isfile(source) and zipfile.is_zipfile(source)
+        if not is_zip and not os.path.isdir(source):
+            raise RuntimeError(f"это не архив .zip и не папка: {source}")
+
+        # 1. Собрать список файлов (защита путей + определение типа).
+        if is_zip:
+            with zipfile.ZipFile(source) as zf:
+                infos = self._safe_names(zf)
+                rels = [i.filename.replace("\\", "/") for i in infos]
+        else:
+            infos = None
+            rels = []
+            for root, dirs, files in os.walk(source):
+                dirs[:] = [d for d in dirs if not d.startswith(".")]
+                for fn in files:
+                    full = os.path.join(root, fn)
+                    rel = os.path.relpath(full, source).replace("\\", "/")
+                    if rel.startswith("/") or ".." in rel.split("/"):
+                        raise RuntimeError(f"небезопасный путь в папке: {rel}")
+                    rels.append(rel)
+        install_rels = [r for r in rels if r.lower() != "mddl.json"]
+        if not install_rels:
+            raise RuntimeError("нет файлов игры для установки "
+                              "(нужны ROUTES/…, TRAINS/…, GLOBAL/…)")
+
+        # 2. Метаданные пакета.
+        base_name = os.path.splitext(os.path.basename(source.rstrip("/\\")))[0]
+        pkg_id = sanitize_package_id(meta.get("id") or base_name)
+        name = str(meta.get("name") or base_name or pkg_id)
+        ptype = str(meta.get("type") or "").strip().lower()
+        if ptype not in KNOWN_TYPES:
+            ptype = guess_package_type(install_rels)
+        version = str(meta.get("version") or "1.0.0")
+        depends = ([str(d) for d in meta["depends"]]
+                   if isinstance(meta.get("depends"), list) else [])
+        addons = ([str(a) for a in meta["addons"]]
+                  if isinstance(meta.get("addons"), list) else [])
+        description = str(meta.get("description") or "")
+
+        # 3. Убрать предыдущую версию этого пакета (если была).
+        state = self._load_state()
+        old = state["packages"].get(pkg_id)
+        if old:
+            self._remove_files(old.get("files") or [])
+
+        # 4. Распаковать в папку игры.
+        collected = []
+        total = len(install_rels)
+        if is_zip:
+            with zipfile.ZipFile(source) as zf:
+                safe = [i for i in self._safe_names(zf)
+                        if i.filename.replace("\\", "/").lower() != "mddl.json"]
+                for idx, info in enumerate(safe, 1):
+                    rel = info.filename.replace("\\", "/")
+                    target = os.path.join(self.game_dir, *rel.split("/"))
+                    os.makedirs(os.path.dirname(target) or self.game_dir,
+                                exist_ok=True)
+                    with zf.open(info) as src, open(target, "wb") as out:
+                        shutil.copyfileobj(src, out)
+                    collected.append(rel)
+                    if progress is not None:
+                        progress(idx, total)
+        else:
+            for idx, rel in enumerate(install_rels, 1):
+                src_path = os.path.join(source, *rel.split("/"))
+                target = os.path.join(self.game_dir, *rel.split("/"))
+                os.makedirs(os.path.dirname(target) or self.game_dir,
+                            exist_ok=True)
+                shutil.copyfile(src_path, target)
+                collected.append(rel)
+                if progress is not None:
+                    progress(idx, total)
+
+        entry = {
+            "id": pkg_id,
+            "name": name,
+            "type": ptype,
+            "version": version,
+            "description": description,
+            "depends": depends,
+            "addons": addons,
+            "files": collected,
+            "source": "archive" if is_zip else "folder",
+            "installed_at": datetime.now(timezone.utc).strftime(
+                "%Y-%m-%dT%H:%M:%SZ"),
+        }
+        state["packages"][pkg_id] = entry
+        self._save_state(state)
+        return entry
 
     def clear_cache(self) -> int:
         """Удалить скачанные архивы. Возвращает освобождённых байтов."""
