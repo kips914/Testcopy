@@ -21,7 +21,7 @@ python -m PyInstaller --noconfirm --clean --onefile --noconsole ^
     --icon assets\launcher.ico ^
     --version-file version_info.txt ^
     --add-data "assets\launcher.png;." ^
-    --dist-dir dist --workpath build --specpath build ^
+    --distpath dist --workpath build ^
     main.py
 if errorlevel 1 goto :err
 
