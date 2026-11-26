@@ -33,6 +33,27 @@
 Чтобы работал контент MaDaDev, добавь своё зеркало во вкладке
 **«Настройки»** (см. ниже).
 
+## Сборка .exe (standalone)
+
+**Вариант 1 — на своём ПК (Windows):** запусти **`build_exe.bat`**.
+Он поставит PyInstaller и создаст один самодостаточный файл
+`dist\MaDaDevRTS-Launcher.exe` (без консоли, с иконкой и версией в
+свойствах файла). Python пользователям больше не нужен.
+
+**Вариант 2 — через GitHub Actions:** в репозитории открой
+**Actions → «Build launcher EXE» → Run workflow**, дождися сборки
+(≈3 минуты, сначала гоняются тесты) и скачай готовый exe из
+**Artifacts**.
+
+Что учитывает сборка exe:
+
+* настройки, демо-репозиторий и `launcher_error.log` пишутся **рядом с
+  exe**, а не во временный каталог (важно для onefile-режима PyInstaller);
+* необработанные ошибки попадают в `launcher_error.log` и в окно
+  с ошибкой — удобно, когда консоли нет;
+* иконка окна берётся из `assets/launcher.png`, иконка файла — из
+  `assets/launcher.ico`.
+
 ## Настройки
 
 Во вкладке **«Настройки»**:
@@ -110,8 +131,14 @@
 ```
 madadev_launcher/
 ├── main.py            # GUI (tkinter): каталог, установка, настройки, журнал
-├── run.bat            # запуск на Windows
+├── run.bat            # запуск из исходников (Windows)
+├── build_exe.bat      # сборка standalone .exe (PyInstaller)
+├── version_info.txt   # версия и описание для ресурсов exe
+├── assets/
+│   ├── launcher.png   # иконка окна
+│   └── launcher.ico   # иконка exe (16–256 px)
 ├── core/
+│   ├── paths.py       # пути для исходников и onefile-exe
 │   ├── config.py      # настройки (config.json)
 │   ├── manifest.py    # манифест + резолв зависимостей/дополнений
 │   ├── net.py         # зеркала, резум-загрузка, SHA-256, фейловер
@@ -123,6 +150,9 @@ madadev_launcher/
 │   └── fake_tkinter.py     # заглушка tkinter для headless-тестов
 └── README.md
 ```
+
+Сборку exe также гоняет CI: `.github/workflows/build-launcher.yml`
+(тесты на Linux → PyInstaller на Windows → артефакт).
 
 ## Тесты
 

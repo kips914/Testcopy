@@ -16,10 +16,13 @@ import subprocess
 import sys
 import threading
 import traceback
+from datetime import datetime
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-if BASE_DIR not in sys.path:
-    sys.path.insert(0, BASE_DIR)
+# Запуск из исходников: рядом должна лежать пакет core/ (в exe он вшит).
+if not getattr(sys, "frozen", False):
+    _SRC_DIR = os.path.dirname(os.path.abspath(__file__))
+    if _SRC_DIR not in sys.path:
+        sys.path.insert(0, _SRC_DIR)
 
 try:
     import tkinter as tk
@@ -32,6 +35,7 @@ except ImportError:  # pragma: no cover
     )
     sys.exit(1)
 
+from core import paths as app_paths
 from core.config import Config
 from core.demo import ensure_demo_repo
 from core.install import Installer, fmt_size
@@ -39,6 +43,12 @@ from core.manifest import TYPE_LABELS, Manifest, load_manifest, resolve
 from core.net import Cancelled, RepoClient
 
 APP_TITLE = "MaDaDev RTS — Лаунчер"
+APP_VERSION = "1.0.0"
+# Папка exe (в собранном виде) или папка исходников — сюда пишутся
+# config.json, demo_repo/ и launcher_error.log.
+BASE_DIR = app_paths.app_dir()
+# Ресурсы: вшитые в exe (sys._MEIPASS) либо папка исходников.
+RESOURCE_DIR = app_paths.resource_dir()
 
 # Палитра
 BG = "#12141a"
@@ -83,11 +93,12 @@ class LauncherApp:
         self.cfg = Config(os.path.join(BASE_DIR, "config.json"))
         self.installer = Installer(self.cfg.get("game_dir") or "")
 
-        root.title(APP_TITLE)
+        root.title(f"{APP_TITLE}  ·  v{APP_VERSION}")
         root.geometry(self.cfg.get("window_geometry") or "1080x680")
         root.minsize(940, 580)
         root.configure(bg=BG)
         root.protocol("WM_DELETE_WINDOW", self._on_close)
+        self._apply_window_icon(root)
 
         self._build_style()
         self._build_ui()
@@ -164,6 +175,9 @@ class LauncherApp:
         self.btn_refresh = ttk.Button(top, text="⟳ Обновить каталог",
                                       command=self.refresh_catalog)
         self.btn_refresh.pack(side="right", padx=(8, 0))
+        self.btn_open_folder = ttk.Button(top, text="📂 Папка игры",
+                                          command=self.open_game_folder)
+        self.btn_open_folder.pack(side="right", padx=(8, 0))
         self.btn_launch = ttk.Button(top, text="▶ Запустить игру",
                                      style="Accent.TButton", command=self.launch_game)
         self.btn_launch.pack(side="right", padx=(8, 0))
@@ -783,6 +797,39 @@ class LauncherApp:
     # ------------------------------------------------------------------ #
     # Служебное
     # ------------------------------------------------------------------ #
+    @staticmethod
+    def _apply_window_icon(root: "tk.Tk") -> None:
+        """Иконка окна: из папки исходников либо из ресурсов exe."""
+        candidates = (
+            os.path.join(RESOURCE_DIR, "assets", "launcher.png"),
+            os.path.join(RESOURCE_DIR, "launcher.png"),
+        )
+        for path in candidates:
+            if not os.path.isfile(path):
+                continue
+            try:
+                img = tk.PhotoImage(file=path)
+                root.iconphoto(True, img)
+                root._mdd_icon = img  # не давать GC убрать картинку
+            except Exception:
+                pass
+            return
+
+    def open_game_folder(self) -> None:
+        game_dir = self.cfg.get("game_dir") or ""
+        if not game_dir or not os.path.isdir(game_dir):
+            messagebox.showwarning(APP_TITLE, "Папка с игрой не указана.",
+                                   parent=self.root)
+            self.notebook.select(self.tab_settings)
+            return
+        try:
+            if os.name == "nt":
+                os.startfile(game_dir)  # noqa: S606
+            else:
+                subprocess.Popen(["xdg-open", game_dir])
+        except OSError as exc:
+            self.log(f"Не удалось открыть папку: {exc}", "warn")
+
     def _set_busy(self, busy: bool) -> None:
         state = ["disabled"] if busy else ["!disabled"]
         for btn in (self.btn_install_sel, self.btn_install_all,
@@ -883,7 +930,45 @@ class LauncherApp:
         self.root.destroy()
 
 
+def _log_uncaught(exc_type, exc, tb) -> None:
+    """Необработанные ошибки — в stderr и launcher_error.log рядом с exe."""
+    text = "".join(traceback.format_exception(exc_type, exc, tb))
+    try:
+        sys.stderr.write(text)
+    except Exception:
+        pass
+    try:
+        with open(os.path.join(BASE_DIR, "launcher_error.log"), "a",
+                  encoding="utf-8") as f:
+            f.write(f"\n===== {datetime.now().isoformat(timespec='seconds')} "
+                    f"=====\n{text}")
+    except OSError:
+        pass
+    if exc_type in (SystemExit, KeyboardInterrupt):
+        return
+    try:
+        import tkinter.messagebox as mb
+        mb.showerror(
+            APP_TITLE,
+            f"Произошла непредвиденная ошибка:\n\n{exc}\n\n"
+            "Подробности записаны в файл launcher_error.log "
+            "рядом с лаунчером.",
+        )
+    except Exception:
+        pass
+
+
+def _install_error_handler() -> None:
+    sys.excepthook = _log_uncaught
+
+    def _thread_hook(args) -> None:
+        _log_uncaught(args.exc_type, args.exc_value, args.exc_traceback)
+
+    threading.excepthook = _thread_hook
+
+
 def main() -> None:
+    _install_error_handler()
     root = tk.Tk()
     LauncherApp(root)
     root.mainloop()

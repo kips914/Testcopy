@@ -2,3 +2,7 @@ demo_repo/
 config.json
 __pycache__/
 *.pyc
+dist/
+build/
+*.spec
+launcher_error.log
