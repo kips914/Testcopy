@@ -224,6 +224,29 @@ python3 tests/test_core.py       # ядро: зеркала, SHA-256, устан
 python3 tests/test_gui_smoke.py  # логика окна без дисплея
 ```
 
+## База: RTrainSim (RTS)
+
+MaDaDev RTS — это **RTrainSim** (наследник Microsoft Train Simulator).
+Корень игры — классические каталоги MSTS/RTS:
+
+```
+<папка игры>/
+├── ROUTES/    # маршруты (картa): .trk, TILES, WORLD, SHAPES, ACTIVITIES…
+├── TRAINS/    # подвижной состав: TRAINSET/*.eng, *.wag, *.sd, CONSISTS…
+├── GLOBAL/    # общие ресурсы: SHAPES, TEXTURES, SOUNDS…
+├── SOUND/     # звуки (.sms и пр.)
+└── GUI/       # интерфейс
+```
+
+Форматы файлов (`.trk`, `.w`, `.eng`, `.wag`, `.sms`, `.sd`, DLL кабин)
+описаны в документации [MRC-Inc/rts-docs](https://github.com/MRC-Inc/rts-docs);
+открытая реализация [SmileDoge/openRTS](https://github.com/SmileDoge/openRTS)
+(переработка RTS) подробно раскрывает структуру установки и VFS в
+[`docs/ru/vfs-tutorial-ru.md`](https://github.com/SmileDoge/openRTS/blob/master/docs/ru/vfs-tutorial-ru.md).
+Лаунчер ставит файлы именно в эту структуру: архивы и папки с
+`ROUTES/…`, `TRAINS/…`, `GLOBAL/…`, `SOUND/…`, `GUI/…` распаковываются
+как есть, в корень игры.
+
 ## Заметки
 
 * Официальные серверы MaDaDev используют закрытый протокол с

@@ -12,8 +12,8 @@ sys.path.insert(0, BASE)
 from core.config import Config
 from core.demo import ensure_demo_repo, build_demo_repo
 from core.install import (Installer, fmt_size, guess_package_type,
-                          read_package_meta, sanitize_package_id,
-                          version_cmp)
+                          looks_like_game_tree, read_package_meta,
+                          sanitize_package_id, version_cmp)
 from core.manifest import load_manifest, resolve, ManifestError
 from core.net import RepoClient, RepoError, sha256_file
 
@@ -311,6 +311,13 @@ with tempfile.TemporaryDirectory() as tmp5:
           guess_package_type(["ROUTES/R/ACTIVITIES/a.txt"]) == "scenario")
     check("guess: map",
           guess_package_type(["ROUTES/R/routes.txt"]) == "map")
+
+    # База MaDaDev RTS = RTrainSim: ROUTES/TRAINS/GLOBAL/SOUND/GUI
+    check("game tree: каталоги RTS",
+          looks_like_game_tree(["SOUND", "GUI"])
+          and looks_like_game_tree(["ROUTES"])
+          and looks_like_game_tree(["ROUTES", "TRAINS", "GLOBAL", "SOUND"])
+          and not looks_like_game_tree(["docs", "readme.txt"]))
 
     # Защита от zip-slip в локальной установке
     evil = os.path.join(tmp5, "evil_local.zip")

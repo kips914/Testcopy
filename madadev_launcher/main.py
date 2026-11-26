@@ -769,7 +769,7 @@ class LauncherApp:
 
     def install_from_folder(self) -> None:
         path = filedialog.askdirectory(
-            title="Выбери папку пакета (ROUTES / TRAINS / GLOBAL)",
+            title="Выбери папку пакета (ROUTES / TRAINS / GLOBAL / SOUND)",
             parent=self.root,
         )
         if not path:
@@ -785,7 +785,7 @@ class LauncherApp:
             if not messagebox.askyesno(
                 APP_TITLE,
                 "В папке нет игровых каталогов (ROUTES, TRAINS, GLOBAL, "
-                "SOUNDS).\nВсё равно установить её содержимое в папку игры?",
+                "SOUND, GUI).\nВсё равно установить её содержимое в папку игры?",
                 parent=self.root,
             ):
                 return

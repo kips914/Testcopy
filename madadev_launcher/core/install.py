@@ -93,10 +93,17 @@ def guess_package_type(rel_paths) -> str:
 
 
 def looks_like_game_tree(names) -> bool:
-    """Есть ли среди верхнеуровневых записей игровые каталоги."""
+    """Есть ли среди верхнеуровневых записей игровые каталоги.
+
+    MaDaDev RTS — это RTrainSim (наследник MSTS): корень игры содержит
+    ``ROUTES``, ``TRAINS``, ``GLOBAL``, ``SOUND``, ``GUI``; у openRTS
+    добавляются ``PACKS`` и ``MODS_OPENRTS``. ``SOUNDS`` — вариант
+    написания из старых сборок.
+    """
     tops = {str(n).replace("\\", "/").split("/")[0].lower()
             for n in names if str(n).strip()}
-    return bool(tops & {"routes", "trains", "global", "sounds"})
+    return bool(tops & {"routes", "trains", "global",
+                        "sound", "sounds", "gui", "packs"})
 
 
 class Installer:
