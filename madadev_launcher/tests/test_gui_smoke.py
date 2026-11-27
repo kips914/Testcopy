@@ -211,6 +211,7 @@ def main_test():
     app._activate_mirror()   # без выделения — no-op
     app._remove_mirror()     # без выделения — no-op
     app._add_mirror()        # диалог отменён (None) — no-op
+    app.install_from_url()   # диалог отменён (None) — no-op
     check("зеркала не сломаны", len(app.effective_mirrors()) >= 1)
     check("зеркало реального контента по умолчанию",
           launcher.CONTENT_MIRROR in app.effective_mirrors())

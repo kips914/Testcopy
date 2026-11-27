@@ -12,11 +12,15 @@ from __future__ import annotations
 
 import os
 import queue
+import re
 import subprocess
 import sys
 import threading
+import time
 import traceback
+import urllib.error
 from datetime import datetime
+from urllib.parse import urlparse
 
 # Запуск из исходников: рядом должна лежать пакет core/ (в exe он вшит).
 if not getattr(sys, "frozen", False):
@@ -41,7 +45,7 @@ from core.demo import ensure_demo_repo
 from core.install import (Installer, fmt_size, looks_like_game_tree,
                           read_package_meta)
 from core.manifest import TYPE_LABELS, Manifest, load_manifest, resolve
-from core.net import Cancelled, RepoClient
+from core.net import Cancelled, RepoClient, fetch_url_to
 
 APP_TITLE = "MaDaDev RTS — Лаунчер"
 APP_VERSION = "1.0.0"
@@ -278,6 +282,9 @@ class LauncherApp:
         self.btn_local_folder = ttk.Button(bar, text="📁 Установить из папки…",
                                            command=self.install_from_folder)
         self.btn_local_folder.pack(side="left", padx=(8, 0))
+        self.btn_local_url = ttk.Button(bar, text="🔗 По ссылке…",
+                                        command=self.install_from_url)
+        self.btn_local_url.pack(side="left", padx=(8, 0))
         self.btn_uninstall = ttk.Button(bar, text="🗑 Удалить выбранное",
                                         style="Danger.TButton",
                                         command=self._uninstall_selected)
@@ -810,6 +817,98 @@ class LauncherApp:
                 return
         self.install_local_package(path, kind="folder")
 
+    def install_from_url(self) -> None:
+        """Скачать архив по прямой ссылке и установить его."""
+        if self.job_running:
+            return
+        if not self.installer.ready:
+            messagebox.showwarning(
+                APP_TITLE,
+                "Сначала укажи папку с игрой во вкладке «Настройки».",
+                parent=self.root,
+            )
+            self.notebook.select(self.tab_settings)
+            return
+        url = simpledialog.askstring(
+            "Установка по ссылке",
+            "Прямая ссылка на архив .zip:\n"
+            "(trainsim.ru, ТЧ-КЛУБ, Яндекс.Диск, свой сервер…)",
+            parent=self.root,
+        )
+        if not url or not url.strip():
+            return
+        url = url.strip()
+        if not url.lower().startswith(("http://", "https://")):
+            messagebox.showerror(
+                APP_TITLE,
+                "Нужна прямая ссылка http:// или https://.",
+                parent=self.root,
+            )
+            return
+        self.job_cancel.clear()
+        self.job_running = True
+        self._set_busy(True)
+        self.log(f"— Скачивание по ссылке: {url} —", "muted")
+        threading.Thread(target=self._url_install_worker,
+                         args=(url,), daemon=True).start()
+
+    def _url_install_worker(self, url: str) -> None:
+        q = self.q
+        dest = ""
+        try:
+            # Имя файла из URL (квери-строк отбрасываем)
+            name = os.path.basename(urlparse(url).path) or "download"
+            name = re.sub(r"[^A-Za-z0-9._-]+", "_", name).strip("._") \
+                or "download"
+            if not name.lower().endswith(".zip"):
+                name += ".zip"
+            dest = os.path.join(self.installer.cache_dir, "by-url", name)
+
+            stamp = [0.0]
+
+            def progress(done: int, total: int) -> None:
+                now = time.time()
+                if now - stamp[0] < 0.25:
+                    return
+                stamp[0] = now
+                if total:
+                    q.put(("progress", done, total, "Скачивание"))
+                else:
+                    q.put(("status", f"Скачивание: {fmt_size(done)}"))
+
+            fetch_url_to(
+                url, dest,
+                progress=progress,
+                cancel=self.job_cancel.is_set,
+                timeout=max(30, int(self.cfg.get("timeout") or 30)),
+            )
+            if self.job_cancel.is_set():
+                q.put(("job_done", False, "Скачивание отменено"))
+                return
+
+            meta = read_package_meta(dest)
+            entry = self.installer.install_local(dest, meta)
+            src_mb = fmt_size(os.path.getsize(dest))
+            q.put(("log",
+                   f"✓ Установлено по ссылке: {entry['name']} "
+                   f"({TYPE_LABELS.get(entry['type'], entry['type'])}, "
+                   f"{entry['version']}) — файлов: {len(entry['files'])}, "
+                   f"архив {src_mb}", "ok"))
+            q.put(("job_done", True,
+                   f"Установлено: {entry['name']} {entry['version']}"))
+        except Cancelled:
+            q.put(("job_done", False, "Скачивание отменено"))
+        except urllib.error.HTTPError as exc:
+            q.put(("log", f"Ошибка скачивания: HTTP {exc.code} "
+                          f"{exc.reason}", "err"))
+            q.put(("job_done", False, f"Ссылка недоступна (HTTP {exc.code})"))
+        except urllib.error.URLError as exc:
+            q.put(("log", f"Ошибка скачивания: {exc.reason}", "err"))
+            q.put(("job_done", False, "Не удалось скачать по ссылке"))
+        except Exception as exc:  # noqa: BLE001
+            q.put(("log", traceback.format_exc(), "err"))
+            q.put(("job_done", False, f"Ошибка: {exc}"))
+
     def install_local_package(self, path: str, kind: str = "archive") -> None:
         """Поставить реальный пакет из .zip или папки — без репозитория."""
         if self.job_running:
@@ -935,7 +1034,8 @@ class LauncherApp:
         for btn in (self.btn_install_sel, self.btn_install_all,
                     self.btn_update_sel, self.btn_uninstall,
                     self.btn_check_updates, self.btn_refresh,
-                    self.btn_local_archive, self.btn_local_folder):
+                    self.btn_local_archive, self.btn_local_folder,
+                    self.btn_local_url):
             btn.state(state)
         if busy:
             # Кнопка отмены подменяет «Обновить каталог» на время задачи

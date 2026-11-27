@@ -34,6 +34,47 @@ def sha256_file(path: str) -> str:
     return h.hexdigest()
 
 
+def fetch_url_to(url: str, dest: str, progress=None, cancel=None,
+                 timeout: int = 60, chunk: int = CHUNK):
+    """Скачать файл по прямой ссылке в ``dest`` (через временный ``.part``).
+
+    * ``progress(done, total)`` — вызывается по мере скачивания;
+      ``total`` может быть 0, если сервер не прислал Content-Length;
+    * ``cancel()`` — возвращает True, чтобы прервать (``Cancelled``);
+    * при ошибке или отмене временный файл удаляется.
+
+    Возвращает ``(dest, bytes_downloaded)``.
+    """
+    directory = os.path.dirname(dest)
+    if directory:
+        os.makedirs(directory, exist_ok=True)
+    part = dest + ".part"
+    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as resp, \
+                open(part, "wb") as out:
+            total = int(resp.headers.get("Content-Length") or 0)
+            done = 0
+            while True:
+                if cancel is not None and cancel():
+                    raise Cancelled("скачивание отменено")
+                buf = resp.read(chunk)
+                if not buf:
+                    break
+                out.write(buf)
+                done += len(buf)
+                if progress is not None:
+                    progress(done, total)
+        os.replace(part, dest)
+    except BaseException:
+        try:
+            os.remove(part)
+        except OSError:
+            pass
+        raise
+    return dest, done
+
+
 class RepoClient:
     """Доступ к файлам репозитория через список зеркал.
 

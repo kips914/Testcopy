@@ -411,6 +411,62 @@ with tempfile.TemporaryDirectory() as tmp7:
     cfg = Config(os.path.join(tmp7, "config.json"))
     check("демо выключено по умолчанию", cfg.get("use_demo_repo") is False)
 
+# 12. Скачивание по прямой ссылке (fetch_url_to) — локальный HTTP-сервер
+import functools  # noqa: E402
+import http.server  # noqa: E402
+import threading  # noqa: E402
+
+from core.net import Cancelled, fetch_url_to  # noqa: E402
+
+with tempfile.TemporaryDirectory() as tmp9:
+    payload = b"PK\x03\x04-real-url-bytes-" + os.urandom(64 * 1024)
+    with open(os.path.join(tmp9, "archive.zip"), "wb") as f:
+        f.write(payload)
+
+    class _Quiet(http.server.SimpleHTTPRequestHandler):
+        def log_message(self, *args):  # noqa: D102
+            pass
+
+    handler = functools.partial(_Quiet, directory=tmp9)
+    httpd = http.server.HTTPServer(("127.0.0.1", 0), handler)
+    port = httpd.server_address[1]
+    thread = threading.Thread(target=httpd.serve_forever, daemon=True)
+    thread.start()
+    try:
+        dest = os.path.join(tmp9, "out", "got.zip")
+        seen = []
+        got_path, nbytes = fetch_url_to(
+            f"http://127.0.0.1:{port}/archive.zip", dest,
+            progress=lambda d, t: seen.append((d, t)))
+        check("url: файл скачан", os.path.isfile(dest) and nbytes == len(payload))
+        with open(dest, "rb") as f:
+            check("url: содержимое совпало", f.read() == payload)
+        check("url: прогресс вызван", bool(seen) and seen[-1][0] == len(payload),
+              str(seen[-1:]))
+
+        try:
+            fetch_url_to(f"http://127.0.0.1:{port}/missing.zip",
+                         os.path.join(tmp9, "nope.zip"))
+            check("url: 404 -> ошибка", False)
+        except Exception:
+            check("url: 404 -> ошибка", True)
+        check("url: не оставил хвостов",
+              not os.path.isfile(os.path.join(tmp9, "nope.zip"))
+              and not os.path.isfile(os.path.join(tmp9, "nope.zip.part")))
+
+        try:
+            fetch_url_to(f"http://127.0.0.1:{port}/archive.zip",
+                         os.path.join(tmp9, "cancel.zip"),
+                         cancel=lambda: True)
+            check("url: отмена -> Cancelled", False)
+        except Cancelled:
+            check("url: отмена -> Cancelled", True)
+        check("url: отмена убрала .part",
+              not os.path.isfile(os.path.join(tmp9, "cancel.zip.part")))
+    finally:
+        httpd.shutdown()
+        httpd.server_close()
+
 print()
 if fails:
     print(f"FAILED: {len(fails)} -> {fails}")
