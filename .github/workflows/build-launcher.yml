@@ -1,0 +1,95 @@
+name: Build launcher EXE
+
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - arena/da62d0fd-testcopy
+    paths:
+      - 'madadev_launcher/**'
+      - '.github/workflows/build-launcher.yml'
+
+jobs:
+  test:
+    name: Tests (Linux)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Core tests
+        run: python madadev_launcher/tests/test_core.py
+      - name: GUI smoke tests (headless)
+        run: python madadev_launcher/tests/test_gui_smoke.py
+
+  build:
+    name: Build EXE (Windows)
+    needs: test
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install build deps
+        run: python -m pip install --upgrade pyinstaller pillow
+      - name: Build standalone exe
+        shell: pwsh
+        run: |
+          python --version
+          python -m PyInstaller --version
+          python -m PyInstaller --noconfirm --clean --onefile --noconsole --name MaDaDevRTS-Launcher --paths madadev_launcher --icon madadev_launcher/assets/launcher.ico --version-file madadev_launcher/version_info.txt --add-data "madadev_launcher/assets/launcher.png;." --distpath dist --workpath build madadev_launcher/main.py 2>&1 | Tee-Object -FilePath build.log
+          if ($LASTEXITCODE -ne 0) {
+            $code = $LASTEXITCODE
+            Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "### Build failed (exit $code), tail of PyInstaller log:"
+            Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value '```text'
+            Get-Content build.log -Tail 40 | Add-Content -Path $env:GITHUB_STEP_SUMMARY
+            Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value '```'
+            $err = @(Select-String -Path build.log -Pattern 'pyinstaller: error|error:' | Select-Object -First 3)
+            if ($err.Count -gt 0) {
+              $err | ForEach-Object { Write-Host "::error::$($_.Line)" }
+            } else {
+              Get-Content build.log -Tail 8 | ForEach-Object { Write-Host "::error::$_" }
+            }
+            exit 1
+          }
+      - name: Upload build log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: build.log
+          retention-days: 7
+      - name: Check artifact
+        shell: pwsh
+        run: |
+          $f = Get-Item dist/MaDaDevRTS-Launcher.exe
+          Write-Host "Built: $($f.FullName) ($([math]::Round($f.Length/1MB,2)) MB)"
+          if ($f.Length -lt 1MB) { throw "exe подозрительно маленький" }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MaDaDevRTS-Launcher-exe
+          path: dist/MaDaDevRTS-Launcher.exe
+          if-no-files-found: error
+          retention-days: 14
+      # Ручной запуск: кладём exe в ветку, чтобы его можно было забрать
+      # обычным git pull (artifact-хост GitHub недоступен из песочницы).
+      - name: Attach exe to branch
+        if: github.event_name == 'workflow_dispatch'
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          mkdir -p release
+          cp dist/MaDaDevRTS-Launcher.exe release/MaDaDevRTS-Launcher.exe
+          git add release/MaDaDevRTS-Launcher.exe
+          if git diff --cached --quiet; then
+            echo "exe уже в ветке, изменений нет"
+          else
+            git commit -m "ci: MaDaDevRTS-Launcher.exe [skip ci]"
+            git push origin "HEAD:refs/heads/${GITHUB_REF_NAME}"
+          fi
